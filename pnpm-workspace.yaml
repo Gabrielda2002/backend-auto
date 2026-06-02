@@ -1,0 +1,1 @@
+onlyBuiltDependencies: prisma,@prisma/engines,@nestjs/core,unrs-resolver

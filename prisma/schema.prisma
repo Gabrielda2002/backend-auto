@@ -1,0 +1,346 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model CatRegimen {
+  id          Int    @id @default(autoincrement()) @db.SmallInt
+  raw         String @unique @db.VarChar(30)
+  normalizado String @db.VarChar(20)
+
+  @@map("cat_regimen")
+}
+
+model CatTipoAgenda {
+  id          Int    @id @default(autoincrement()) @db.SmallInt
+  raw         String @unique @db.VarChar(50)
+  normalizado String @db.VarChar(20)
+
+  @@map("cat_tipo_agenda")
+}
+
+model CatTipoCita {
+  id          Int    @id @default(autoincrement()) @db.SmallInt
+  raw         String @unique @db.VarChar(30)
+  normalizado String @db.VarChar(20)
+
+  @@map("cat_tipo_cita")
+}
+
+model CatEstadoCita {
+  id                 Int    @id @default(autoincrement()) @db.SmallInt
+  raw                String @unique @db.VarChar(30)
+  estadoAutorizacion String @db.VarChar(30) @map("estado_autorizacion")
+  estadoConsulta     String @db.VarChar(20) @map("estado_consulta")
+
+  @@map("cat_estado_cita")
+}
+
+model CatSede {
+  id          Int    @id @default(autoincrement()) @db.SmallInt
+  raw         String @unique @db.VarChar(100)
+  normalizado String @db.VarChar(100)
+
+  @@map("cat_sede")
+}
+
+model CatConvenio {
+  id                    Int     @id @default(autoincrement()) @db.SmallInt
+  nombreConvenio        String  @unique @db.VarChar(200) @map("nombre_convenio")
+  tipoServicio          String? @db.VarChar(20) @map("tipo_servicio")
+  nombreMpio            String? @db.VarChar(50) @map("nombre_mpio")
+  entidadAdministradora String? @db.VarChar(100) @map("entidad_administradora")
+  regimen               String? @db.VarChar(20)
+
+  @@map("cat_convenio")
+}
+
+model CatConvenioSap {
+  id                    Int     @id @default(autoincrement()) @db.SmallInt
+  sedeUo                String  @db.VarChar(100) @map("sede_uo")
+  codAseguradora        String  @db.VarChar(30) @map("cod_aseguradora")
+  interlocutorComercial String  @db.VarChar(100) @map("interlocutor_comercial")
+  nombreConvenio        String? @db.VarChar(200) @map("nombre_convenio")
+  tipoServicio          String? @db.VarChar(20) @map("tipo_servicio")
+  regimen               String? @db.VarChar(20)
+  nombreSede            String? @db.VarChar(100) @map("nombre_sede")
+  nombreMpio            String? @db.VarChar(50) @map("nombre_mpio")
+  entidadAdministradora String? @db.VarChar(100) @map("entidad_administradora")
+
+  @@unique([sedeUo, codAseguradora, interlocutorComercial], name: "uk_sap")
+  @@map("cat_convenio_sap")
+}
+
+model CatCups {
+  id          Int     @id @default(autoincrement()) @db.SmallInt
+  codigo      String  @unique @db.VarChar(10)
+  descripcion String? @db.VarChar(200)
+  homologado  String? @db.VarChar(100)
+  pym         String? @db.VarChar(100)
+  grupo       String? @db.VarChar(100)
+
+  @@map("cat_cups")
+}
+
+model CatCupsPana {
+  id               Int    @id @default(autoincrement()) @db.SmallInt
+  especialidadCita String @db.VarChar(100) @map("especialidad_cita")
+  esControl        String @db.Char(1) @map("es_control")
+  codigo           String @db.VarChar(10)
+  homologado       String @db.VarChar(100)
+
+  @@unique([especialidadCita, esControl], name: "uk_pana")
+  @@map("cat_cups_pana")
+}
+
+model CatEspecialidad {
+  id                Int     @id @default(autoincrement()) @db.SmallInt
+  raw               String  @unique @db.VarChar(100)
+  espAjustada       String? @db.VarChar(100) @map("esp_ajustada")
+  grupoEspecialidad String? @db.VarChar(100) @map("grupo_especialidad")
+
+  @@map("cat_especialidad")
+}
+
+// ═══════════════════════════════════════════
+//  DATOS CRUDOS (RAW)
+// ═══════════════════════════════════════════
+
+model RawPlenus {
+  id                           Int      @id @default(autoincrement())
+  agendacitaId                 String?  @db.VarChar(30) @map("agendacita_id")
+  fechacita                    DateTime? @db.Date
+  horacita                     DateTime? @db.Time
+  fechadeseada                 DateTime? @db.Date
+  fechaasignacion              DateTime? @db.Date
+  horaInicioConsulta           DateTime? @db.Time @map("hora_inicio_consulta")
+  fechaatencion                DateTime? @db.Date
+  oportunidad                  String?  @db.VarChar(20)
+  convencion                   String?  @db.VarChar(5)
+  identificacion               String?  @db.VarChar(30)
+  nombrecompleto               String?  @db.VarChar(255)
+  sexopaciente                 String?  @db.Char(1)
+  fechanacimiento              DateTime? @db.Date
+  edadanios                    String?  @db.VarChar(10)
+  programacronico              String?  @db.VarChar(100)
+  direccion                    String?  @db.VarChar(500)
+  municipio                    String?  @db.VarChar(100)
+  telefonomovil                String?  @db.VarChar(30)
+  telefonofijo                 String?  @db.VarChar(30)
+  codigocups                   String?  @db.VarChar(20)
+  identificacionmedico         String?  @db.VarChar(30)
+  mediconombre                 String?  @db.VarChar(255)
+  medicoespecialidad            String?  @db.VarChar(100)
+  diagnosticoprincipal         String?  @db.VarChar(10)
+  diagnosticorelacionado1      String?  @db.VarChar(10)
+  diagnosticorelacionado2      String?  @db.VarChar(10)
+  diagnosticorelacionado3      String?  @db.VarChar(10)
+  causaexternaId                String?  @db.VarChar(10) @map("causaexterna_id")
+  causaexternanombre            String?  @db.VarChar(100)
+  finalidadId                  String?  @db.VarChar(10) @map("finalidad_id")
+  finalidad                    String?  @db.VarChar(100)
+  tipodiagnosticoId            String?  @db.VarChar(10) @map("tipodiagnostico_id")
+  tipodiagnosticonombre          String?  @db.VarChar(100)
+  estadoCita                   String?  @db.VarChar(30) @map("estado_cita")
+  pym                          String?  @db.VarChar(255)
+  modalidad                    String?  @db.VarChar(50)
+  estadoConsulta               String?  @db.VarChar(30) @map("estado_consulta")
+  notaNoAsistencia             String?  @db.Text @map("nota_no_asistencia")
+  funcionarioNotaNoAsistencia  String?  @db.VarChar(255) @map("funcionario_nota_no_asistencia")
+  funcionarioasignacita        String?  @db.VarChar(255)
+  convenionombre               String?  @db.VarChar(300)
+  funcionalidad                String?  @db.VarChar(255)
+  rotulo                       String?  @db.VarChar(255)
+  regimen                      String?  @db.VarChar(30)
+  nombreips                    String?  @db.VarChar(150)
+  nombresede                   String?  @db.VarChar(100)
+  turnoDoble                   String?  @db.VarChar(5) @map("turno_doble")
+  identificadorAgenda          String?  @db.VarChar(30) @map("identificador_agenda")
+  nombreEstado                 String?  @db.VarChar(30) @map("nombre_estado")
+  notacita                     String?  @db.Text
+  fechaIngresoCronico          DateTime? @db.Date @map("fecha_ingreso_cronico")
+  tipocita                     String?  @db.VarChar(30)
+  remision                     String?  @db.VarChar(20)
+  poblacionVulnerable          String?  @db.VarChar(50) @map("poblacion_vulnerable")
+
+  @@map("raw_plenus")
+}
+
+model RawPana {
+  id                         Int      @id @default(autoincrement())
+  codigoCita                 String?  @db.VarChar(30) @map("codigo_cita")
+  tipoDocumento              String?  @db.VarChar(20) @map("tipo_documento")
+  identificacion             String?  @db.VarChar(30)
+  nombre                     String?  @db.VarChar(255)
+  sexo                       String?  @db.VarChar(50)
+  nivelUsr                   String?  @db.VarChar(20) @map("nivel_usr")
+  tipoUsuario                String?  @db.VarChar(150) @map("tipo_usuario")
+  edad                       String?  @db.VarChar(10)
+  tel1                       String?  @db.VarChar(30)
+  tel2                       String?  @db.VarChar(30)
+  codigoContrato             String?  @db.VarChar(30) @map("codigo_contrato")
+  nombreCnt                  String?  @db.VarChar(255) @map("nombre_cnt")
+  planCnt                    String?  @db.VarChar(50) @map("plan_cnt")
+  fechaCita                  DateTime? @db.DateTime @map("fecha_cita")
+  consultorio                String?  @db.VarChar(20)
+  turno                      DateTime? @db.Time
+  cuotaRecuperacion          Decimal?  @db.Decimal(18, 2) @map("cuota_recuperacion")
+  citaMasProxima             DateTime? @db.DateTime @map("cita_mas_proxima")
+  fechaDeseada               DateTime? @db.DateTime @map("fecha_deseada")
+  estado                     String?  @db.VarChar(100)
+  fechaAsig                  DateTime? @db.DateTime @map("fecha_asig")
+  codigoSede                 String?  @db.VarChar(20) @map("codigo_sede")
+  nombreSede                 String?  @db.VarChar(100) @map("nombre_sede")
+  codigoMedico               String?  @db.VarChar(30) @map("codigo_medico")
+  nombreMedico               String?  @db.VarChar(255) @map("nombre_medico")
+  especialidad               String?  @db.VarChar(100)
+  grupo                      String?  @db.VarChar(100)
+  procedimientoEspecifico    String?  @db.VarChar(500) @map("procedimiento_especifico")
+  especialidadCita           String?  @db.VarChar(100) @map("especialidad_cita")
+  control                    String?  @db.VarChar(5)
+  tipoAgenda                 String?  @db.VarChar(100) @map("tipo_agenda")
+  codigoUsuarioAsignacion    String?  @db.VarChar(255) @map("codigo_usuario_asignacion")
+  nombreUsuarioAsignacion    String?  @db.VarChar(255) @map("nombre_usuario_asignacion")
+  fechaAtencion              DateTime? @db.DateTime @map("fecha_atencion")
+  dxPpalAtencion             String?  @db.VarChar(10) @map("dx_ppal_atencion")
+  nombreDxPpalAtencion      String?  @db.VarChar(500) @map("nombre_dx_ppal_atencion")
+  citaDoble                  String?  @db.VarChar(20) @map("cita_doble")
+  usuarioCumplimiento        String?  @db.VarChar(255) @map("usuario_cumplimiento")
+  fechaCumplimiento          DateTime? @db.DateTime @map("fecha_cumplimiento")
+  procAgendado               String?  @db.VarChar(255) @map("proc_agendado")
+  fechaAtencionProc          DateTime? @db.DateTime @map("fecha_atencion_proc")
+  usuarioAtencionProc        String?  @db.VarChar(255) @map("usuario_atencion_proc")
+  turnoExtra                 String?  @db.VarChar(20) @map("turno_extra")
+  ctrlPostQx                  String?  @db.VarChar(20) @map("ctrl_post_qx")
+  estadoNorm                 String?  @db.VarChar(100) @map("estado_norm")
+  mes                        String?  @db.VarChar(50)
+  tipoCita                   String?  @db.VarChar(100) @map("tipo_cita")
+  primvezOdont               String?  @db.VarChar(20) @map("primvez_odont")
+  oportunidad                String?  @db.VarChar(20)
+  espAjustada                String?  @db.VarChar(100) @map("esp_ajustada")
+  grupoEspecialidad          String?  @db.VarChar(100) @map("grupo_especialidad")
+  sede                       String?  @db.VarChar(100)
+  entadministradora           String?  @db.VarChar(100)
+  regimen                    String?  @db.VarChar(100)
+  indsolicitud                String?  @db.VarChar(20)
+  inddeseada                 String?  @db.VarChar(20)
+  res256                      String?  @db.VarChar(50)
+  tipocita256                 String?  @db.VarChar(50)
+  res1552                    String?  @db.VarChar(50)
+
+  @@map("raw_pana")
+}
+
+model RawSap {
+  id                          Int      @id @default(autoincrement())
+  sedeUo                      String?  @db.VarChar(100) @map("sede_uo")
+  codHabilitacion             String?  @db.VarChar(30) @map("cod_habilitacion")
+  nitAseguradora              String?  @db.VarChar(30) @map("nit_aseguradora")
+  numeroAutorizacion          String?  @db.VarChar(100) @map("numero_autorizacion")
+  unidadOrganizativa          String?  @db.VarChar(100) @map("unidad_organizativa")
+  uoMedica                    String?  @db.VarChar(100) @map("uo_medica")
+  clvEspecMedicos             String?  @db.VarChar(100) @map("clv_espec_medicos")
+  sedeUo2                     String?  @db.VarChar(100) @map("sede_uo2")
+  prestacion                  String?  @db.VarChar(100)
+  descripcion                 String?  @db.VarChar(500)
+  textoPrestacion1            String?  @db.VarChar(500) @map("texto_prestacion1")
+  textoPrestacion2            String?  @db.VarChar(500) @map("texto_prestacion2")
+  textoPrestacion3            String?  @db.VarChar(500) @map("texto_prestacion3")
+  tipoPrestacion              String?  @db.VarChar(100) @map("tipo_prestacion")
+  codAseguradora              String?  @db.VarChar(100) @map("cod_aseguradora")
+  interlocutorComercial       String?  @db.VarChar(100) @map("interlocutor_comercial")
+  creadoPor                   String?  @db.VarChar(100) @map("creado_por")
+  nombreUsuarioGenerador      String?  @db.VarChar(255) @map("nombre_usuario_generador")
+  codigoUsuarioGenerador      String?  @db.VarChar(100) @map("codigo_usuario_generador")
+  episodio                    String?  @db.VarChar(30)
+  fechaAdmision               DateTime? @db.Date @map("fecha_admision")
+  uoMedicaAdmision            String?  @db.VarChar(100) @map("uo_medica_admision")
+  fechaEntrada                DateTime? @db.Date @map("fecha_entrada")
+  creadoPor2                  String?  @db.VarChar(100) @map("creado_por2")
+  statusEpisodio              String?  @db.VarChar(255) @map("status_episodio")
+  indicadorAnulacion          String?  @db.VarChar(20) @map("indicador_anulacion")
+  nombreResponsableAnulacion  String?  @db.VarChar(255) @map("nombre_responsable_anulacion")
+  fechaAnulacion              DateTime? @db.Date @map("fecha_anulacion")
+  fechaInicio                 DateTime? @db.Date @map("fecha_inicio")
+  horaInicio                  DateTime? @db.Time @map("hora_inicio")
+  fechaCreacion               DateTime? @db.Date @map("fecha_creacion")
+  fechaDeseada                DateTime? @db.Date @map("fecha_deseada")
+  fechaUltimaModif            DateTime? @db.Date @map("fecha_ultima_modif")
+  movimiento                  String?  @db.VarChar(20)
+  statusMovimiento            String?  @db.VarChar(100) @map("status_movimiento")
+  modificadoPor               String?  @db.VarChar(100) @map("modificado_por")
+  numeroPersona               String?  @db.VarChar(30) @map("numero_persona")
+  interlocutorPac             String?  @db.VarChar(255) @map("interlocutor_pac")
+  paciente                    String?  @db.VarChar(100)
+  tipDocIdentifica            String?  @db.VarChar(20) @map("tip_doc_identifica")
+  numIdentificacion            String?  @db.VarChar(30) @map("num_identificacion")
+  nombreCompleto              String?  @db.VarChar(255) @map("nombre_completo")
+  apellido                    String?  @db.VarChar(100)
+  apellidoSoltero             String?  @db.VarChar(100) @map("apellido_soltero")
+  primerNombre                String?  @db.VarChar(100) @map("primer_nombre")
+  segundoNombre               String?  @db.VarChar(100) @map("segundo_nombre")
+  fechaNacimiento             DateTime? @db.Date @map("fecha_nacimiento")
+  sexo                        String?  @db.VarChar(50)
+  estadoCivil                 String?  @db.VarChar(20) @map("estado_civil")
+  nacionalidad                String?  @db.VarChar(20)
+  poblacion                   String?  @db.VarChar(100)
+  distrito                    String?  @db.VarChar(50)
+  correoElectronico           String?  @db.VarChar(150) @map("correo_electronico")
+  telefono1                   String?  @db.VarChar(30)
+  telefono2                   String?  @db.VarChar(30)
+  direccion                   String?  @db.VarChar(500)
+  cantidadRegistros            String?  @db.VarChar(20) @map("cantidad_registros")
+  duracionCitacion            String?  @db.VarChar(20) @map("duracion_citacion")
+  edad                        String?  @db.VarChar(10)
+
+  @@map("raw_sap")
+}
+
+// ═══════════════════════════════════════════
+//  TABLA MAESTRA (CONSOLIDADO FINAL)
+// ═══════════════════════════════════════════
+
+model Costos {
+  id                       Int      @id @default(autoincrement())
+  fuente                   String   @db.VarChar(10)
+  codigoOrigen             String?  @db.VarChar(30) @map("codigo_origen")
+  fechaCita                DateTime @db.Date @map("fecha_cita")
+  horaCita                 DateTime? @db.Time @map("hora_cita")
+  fechaDeseada             DateTime? @db.Date @map("fecha_deseada")
+  fechaAsig                DateTime? @db.Date @map("fecha_asig")
+  tipoDocumento            String?  @db.VarChar(20) @map("tipo_documento")
+  identificacion           String?  @db.VarChar(30)
+  nombre                   String?  @db.VarChar(255)
+  sexo                     String?  @db.Char(1)
+  idsoftMedico             String?  @db.VarChar(30) @map("idsoft_medico")
+  idMedico                 String?  @db.VarChar(30) @map("id_medico")
+  nombreMedico             String?  @db.VarChar(255) @map("nombre_medico")
+  especialidad             String?  @db.VarChar(500)
+  pym                      String?  @db.VarChar(255)
+  procedimientoEspecifico  String?  @db.VarChar(500) @map("procedimiento_especifico")
+  grupo                    String?  @db.VarChar(150)
+  cie10Dxppal              String?  @db.VarChar(20) @map("cie10_dxppal")
+  tipoCita                 String?  @db.VarChar(50) @map("tipo_cita")
+  valorRecuperacion         Decimal? @db.Decimal(18, 2) @map("valor_recuperacion")
+  costoServicio             Decimal? @db.Decimal(18, 2) @map("costo_servicio")
+  funcionalidad             String?  @db.VarChar(50)
+  tipoAgenda               String?  @db.VarChar(50) @map("tipo_agenda")
+  estadoAutorizacion       String?  @db.VarChar(100) @map("estado_autorizacion")
+  estadoConsulta           String?  @db.VarChar(50) @map("estado_consulta")
+  nombreUsuarioAsignacion  String?  @db.VarChar(255) @map("nombre_usuario_asignacion")
+  procesoCita              String?  @db.VarChar(50) @map("proceso_cita")
+  nombreConvenio           String?  @db.VarChar(300) @map("nombre_convenio")
+  regimen                  String?  @db.VarChar(50)
+  nombreSede               String?  @db.VarChar(150) @map("nombre_sede")
+  cups                     String?  @db.VarChar(20)
+  tipoServicio             String?  @db.VarChar(50) @map("tipo_servicio")
+  grupoEspecialidad        String?  @db.VarChar(150) @map("grupo_especialidad")
+  nombreMpio               String?  @db.VarChar(100) @map("nombre_mpio")
+  entidadAdministradora    String?  @db.VarChar(150) @map("entidad_administradora")
+  fechaCarga               DateTime @default(now()) @db.DateTime @map("fecha_carga")
+
+  @@map("costos")
+}
