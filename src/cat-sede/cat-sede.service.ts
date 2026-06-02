@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -9,7 +9,13 @@ export class CatSedeService {
     return this.prisma.catSede.findMany();
   }
 
-  findOne(id: number) {
-    return this.prisma.catSede.findUnique({ where: { id } });
+  async findOne(id: number) {
+    const sede = await this.prisma.catSede.findUnique({ where: { id } });
+
+    if (!sede) {
+      throw new NotFoundException(`Sede with ID ${id} not found`);
+    }
+
+    return sede;
   }
 }
