@@ -6,6 +6,9 @@
 # Logs
 logs
 *.log
+
+# App logs directory
+/logs/
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
