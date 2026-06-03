@@ -3,10 +3,12 @@ import * as winston from 'winston';
 
 const logDir = 'logs';
 
-const customFormat = winston.format.printf(({ timestamp, level, message, context }) => {
-  const ctx = context ? ` [${context}]` : '';
-  return `${timestamp} ${level}${ctx} ${message}`;
-});
+const customFormat = winston.format.printf(
+  ({ timestamp, level, message, context }) => {
+    const ctx = context ? ` [${context}]` : '';
+    return `${timestamp} ${level}${ctx} ${message}`;
+  },
+);
 
 export const winstonConfig: winston.LoggerOptions = {
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',

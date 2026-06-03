@@ -7,7 +7,7 @@ export class CatSedeController {
 
   @Get()
   findAll() {
-    return  this.catSedeService.findAll();
+    return this.catSedeService.findAll();
   }
 
   @Get(':id')

@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { CatSedeModule } from './cat-sede/cat-sede.module';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
+import { CatConvenioModule } from './cat_convenio/cat_convenio.module';
 
 @Module({
   imports: [
@@ -19,9 +20,13 @@ import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware
     ]),
     PrismaModule,
     CatSedeModule,
+    CatConvenioModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

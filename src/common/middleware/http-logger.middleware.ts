@@ -14,9 +14,13 @@ export class HttpLoggerMiddleware implements NestMiddleware {
       const { statusCode } = res;
 
       if (statusCode >= 500) {
-        this.logger.error(`${method} ${originalUrl} ${statusCode} ${duration}ms`);
+        this.logger.error(
+          `${method} ${originalUrl} ${statusCode} ${duration}ms`,
+        );
       } else if (statusCode >= 400) {
-        this.logger.warn(`${method} ${originalUrl} ${statusCode} ${duration}ms`);
+        this.logger.warn(
+          `${method} ${originalUrl} ${statusCode} ${duration}ms`,
+        );
       } else {
         this.logger.log(`${method} ${originalUrl} ${statusCode} ${duration}ms`);
       }
