@@ -15,6 +15,10 @@ import { CatCupsModule } from './cat-cups/cat-cups.module';
 import { CatCupsPanaModule } from './cat-cups-pana/cat-cups-pana.module';
 import { CatConvenioModule } from './cat_convenio/cat_convenio.module';
 import { CatConvenioSapModule } from './cat-convenio-sap/cat-convenio-sap.module';
+import { RawPlenusModule } from './raw-plenus/raw-plenus.module';
+import { RawPanaModule } from './raw-pana/raw-pana.module';
+import { RawSapModule } from './raw-sap/raw-sap.module';
+import { CostosModule } from './costos/costos.module';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 
 @Module({
@@ -37,6 +41,10 @@ import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware
     CatCupsPanaModule,
     CatConvenioModule,
     CatConvenioSapModule,
+    RawPlenusModule,
+    RawPanaModule,
+    RawSapModule,
+    CostosModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
