@@ -340,7 +340,22 @@ model Costos {
   grupoEspecialidad        String?  @db.VarChar(150) @map("grupo_especialidad")
   nombreMpio               String?  @db.VarChar(100) @map("nombre_mpio")
   entidadAdministradora    String?  @db.VarChar(150) @map("entidad_administradora")
+  convenioGrupo            String?  @db.VarChar(50) @map("convenio_grupo")
+  sedeGrupo                String?  @db.VarChar(50) @map("sede_grupo")
+  modalidad                String?  @db.VarChar(50)
+  regimenGrupo              String?  @db.VarChar(20) @map("regimen_grupo")
   fechaCarga               DateTime @default(now()) @db.DateTime @map("fecha_carga")
 
   @@map("costos")
+}
+
+model CatConvenioAgrupador {
+  id                    Int     @id @default(autoincrement()) @db.SmallInt
+  nombreConvenio        String @unique @db.VarChar(200) @map("nombre_convenio")
+  convenio              String? @db.VarChar(20) @map("convenio")
+  sede                  String? @db.VarChar(50) @map("sede")
+  modalidad             String? @db.VarChar(50) @map("modalidad")
+  regimen               String? @db.VarChar(20)
+
+  @@map("cat_convenio_agrupador")
 }
