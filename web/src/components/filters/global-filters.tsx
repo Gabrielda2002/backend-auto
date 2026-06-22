@@ -22,10 +22,19 @@ export interface SedeJerarquiaOption {
   sedes: Array<{ value: string; label: string; citas: number }>;
 }
 
+/** Grupo comercial (convenio_grupo) con sus convenios (nombre_convenio) anidados. */
+export interface ConvenioJerarquiaOption {
+  value: string;
+  label: string;
+  citas: number;
+  convenios: Array<{ value: string; label: string; citas: number }>;
+}
+
 interface GlobalFiltersProps {
   periodos: FilterOption[];
   sedeJerarquia: SedeJerarquiaOption[];
   convenios: FilterOption[];
+  convenioJerarquia?: ConvenioJerarquiaOption[];
   modalidades: FilterOption[];
   regimenes: FilterOption[];
   especialidades: FilterOption[];
@@ -33,13 +42,14 @@ interface GlobalFiltersProps {
   selectedSedeGrupo: string;
   selectedSede: string;
   selectedConvenio: string;
+  selectedConvenioDetalle?: string;
   selectedModalidad: string;
   selectedRegimen: string;
   selectedEspecialidad: string;
   onPeriodoChange: (value: string) => void;
   /** Recibe la ciudad (sede_grupo) y la sede fisica (nombre_sede). '' = todas. */
   onSedeChange: (sedeGrupo: string, sede: string) => void;
-  onConvenioChange: (value: string) => void;
+  onConvenioChange: (convenio: string, convenioDetalle?: string) => void;
   onModalidadChange: (value: string) => void;
   onRegimenChange: (value: string) => void;
   onEspecialidadChange: (value: string) => void;
@@ -57,6 +67,7 @@ export function GlobalFilters({
   periodos,
   sedeJerarquia,
   convenios,
+  convenioJerarquia,
   modalidades,
   regimenes,
   especialidades,
@@ -64,6 +75,7 @@ export function GlobalFilters({
   selectedSedeGrupo,
   selectedSede,
   selectedConvenio,
+  selectedConvenioDetalle,
   selectedModalidad,
   selectedRegimen,
   selectedEspecialidad,
@@ -94,13 +106,22 @@ export function GlobalFilters({
           onChange={onSedeChange}
         />
         <Divider />
-        <FilterItem
-          label="Convenio"
-          value={selectedConvenio}
-          onChange={onConvenioChange}
-          options={convenios}
-          placeholder="Todos los convenios"
-        />
+        {convenioJerarquia && convenioJerarquia.length > 0 ? (
+          <ConvenioFilterItem
+            jerarquia={convenioJerarquia}
+            selectedConvenio={selectedConvenio}
+            selectedConvenioDetalle={selectedConvenioDetalle ?? ''}
+            onChange={(c, d) => onConvenioChange(c, d)}
+          />
+        ) : (
+          <FilterItem
+            label="Convenio"
+            value={selectedConvenio}
+            onChange={onConvenioChange}
+            options={convenios}
+            placeholder="Todos los convenios"
+          />
+        )}
         <FilterItem
           label="Modalidad"
           value={selectedModalidad}
@@ -227,6 +248,66 @@ function SedeFilterItem({ jerarquia, selectedSedeGrupo, selectedSede, onChange }
                 ciudad.sedes.map((s) => (
                   <SelectItem key={s.value} value={`s${SEP}${ciudad.value}${SEP}${s.value}`} className="pl-12">
                     {sedeLabel(s.label)}
+                  </SelectItem>
+                ))}
+            </SelectGroup>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+interface ConvenioFilterItemProps {
+  jerarquia: ConvenioJerarquiaOption[];
+  selectedConvenio: string;
+  selectedConvenioDetalle: string;
+  onChange: (convenio: string, convenioDetalle: string) => void;
+}
+
+/**
+ * Filtro de Convenio jerarquico (Grupo comercial -> Convenio). Mismo patron
+ * que SedeFilterItem: "Todos los convenios" limpia ambos; cada grupo es
+ * seleccionable y los grupos con varios convenios muestran sus convenios
+ * indentados. Devuelve (convenio_grupo, convenio) al page-level.
+ */
+function ConvenioFilterItem({
+  jerarquia,
+  selectedConvenio,
+  selectedConvenioDetalle,
+  onChange,
+}: ConvenioFilterItemProps) {
+  const value = selectedConvenioDetalle
+    ? `d${SEP}${selectedConvenio}${SEP}${selectedConvenioDetalle}`
+    : selectedConvenio && selectedConvenio !== 'all'
+      ? `g${SEP}${selectedConvenio}`
+      : 'all';
+
+  function handleChange(v: string) {
+    if (v === 'all') return onChange('', '');
+    const parts = v.split(SEP);
+    if (parts[0] === 'g') return onChange(parts[1], '');
+    if (parts[0] === 'd') return onChange(parts[1], parts[2]);
+  }
+
+  return (
+    <div className="flex flex-col">
+      <span className="text-label-md text-on-surface-variant">Convenio</span>
+      <Select value={value} onValueChange={handleChange}>
+        <SelectTrigger className="h-auto p-0">
+          <SelectValue placeholder="Todos los convenios" />
+        </SelectTrigger>
+        <SelectContent className="max-h-[22rem]">
+          <SelectItem value="all">Todos los convenios</SelectItem>
+          {jerarquia.map((grupo) => (
+            <SelectGroup key={grupo.value}>
+              <SelectItem value={`g${SEP}${grupo.value}`} className="font-semibold">
+                {grupo.label}
+              </SelectItem>
+              {grupo.convenios.length > 1 &&
+                grupo.convenios.map((cv) => (
+                  <SelectItem key={cv.value} value={`d${SEP}${grupo.value}${SEP}${cv.value}`} className="pl-12">
+                    {cv.label}
                   </SelectItem>
                 ))}
             </SelectGroup>

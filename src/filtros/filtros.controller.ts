@@ -38,6 +38,11 @@ export class FiltrosController {
     return this.service.getConveniosGrupo(filters, soloNt === 'true' || soloNt === '1');
   }
 
+  @Get('convenios-jerarquia')
+  conveniosJerarquia(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
+    return this.service.getConveniosJerarquia(filters, soloNt === 'true' || soloNt === '1');
+  }
+
   @Get('sedes-grupo')
   sedesGrupo(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
     return this.service.getSedesGrupo(filters, soloNt === 'true' || soloNt === '1');

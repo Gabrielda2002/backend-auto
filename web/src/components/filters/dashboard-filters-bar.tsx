@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   useRangoFechas,
   useConveniosGrupo,
+  useConveniosJerarquia,
   useSedesJerarquia,
   useModalidades,
   useRegimenes,
@@ -26,9 +27,10 @@ const ALL_OPT: FilterOption = { value: 'all', label: 'Todas' };
  *   - Regimen agrupado      -> ?regimen
  */
 export function DashboardFiltersBar({ soloConveniosNt = false }: { soloConveniosNt?: boolean } = {}) {
-  const { filters, setRango, setFilter, setSedeFilter } = useGlobalFiltersFromUrl();
+  const { filters, setRango, setFilter, setSedeFilter, setConvenioFilter } = useGlobalFiltersFromUrl();
   const sedeJerarquia = useSedesJerarquia(filters, soloConveniosNt);
   const convenios = useConveniosGrupo(filters, soloConveniosNt);
+  const conveniosJerarquia = useConveniosJerarquia(filters, soloConveniosNt);
   const modalidades = useModalidades(filters, soloConveniosNt);
   const regimenes = useRegimenes(filters, soloConveniosNt);
   const especialidades = useGruposEspecialidad(filters, soloConveniosNt);
@@ -84,6 +86,7 @@ export function DashboardFiltersBar({ soloConveniosNt = false }: { soloConvenios
       periodos={periodoOptions}
       sedeJerarquia={sedeOptions}
       convenios={convenioOptions}
+      convenioJerarquia={conveniosJerarquia.data ?? []}
       modalidades={modalidadOptions}
       regimenes={regimenOptions}
       especialidades={especialidadOptions}
@@ -91,6 +94,7 @@ export function DashboardFiltersBar({ soloConveniosNt = false }: { soloConvenios
       selectedSedeGrupo={filters.sedeGrupo ?? ''}
       selectedSede={filters.sede ?? ''}
       selectedConvenio={filters.convenio ?? 'all'}
+      selectedConvenioDetalle={filters.convenioDetalle ?? ''}
       selectedModalidad={filters.modalidad ?? 'all'}
       selectedRegimen={filters.regimen ?? 'all'}
       selectedEspecialidad={filters.grupoEspecialidad ?? 'all'}
@@ -99,7 +103,7 @@ export function DashboardFiltersBar({ soloConveniosNt = false }: { soloConvenios
         setRango(desde, hasta);
       }}
       onSedeChange={(sedeGrupo, sede) => setSedeFilter(sedeGrupo, sede)}
-      onConvenioChange={(value) => setFilter('convenio', value)}
+      onConvenioChange={(convenio, convenioDetalle) => setConvenioFilter(convenio, convenioDetalle ?? '')}
       onModalidadChange={(value) => setFilter('modalidad', value)}
       onRegimenChange={(value) => setFilter('regimen', value)}
       onEspecialidadChange={(value) => setFilter('grupoEspecialidad', value)}

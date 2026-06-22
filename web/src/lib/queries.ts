@@ -12,6 +12,7 @@ import {
   type ConvenioOption,
   type RangoFechas,
   type SedeJerarquia,
+  type ConvenioJerarquia,
 } from './api';
 
 const FIVE_MIN = 5 * 60 * 1000;
@@ -23,6 +24,7 @@ function buildKey(name: string, f: DashboardFilters) {
     f.hasta ?? '',
     f.sede ?? 'all',
     f.convenio ?? 'all',
+    f.convenioDetalle ?? 'all',
     f.sedeGrupo ?? 'all',
     f.modalidad ?? 'all',
     f.regimen ?? 'all',
@@ -109,6 +111,15 @@ export function useConveniosGrupo(f: DashboardFilters = {}, soloNt = false): Use
     // Faceta convenio: depende de los demas filtros, NO de convenio.
     queryKey: ['filtros', 'convenios-grupo', soloNt, f.sede ?? '', f.sedeGrupo ?? '', f.desde ?? '', f.hasta ?? '', f.modalidad ?? '', f.regimen ?? ''],
     queryFn: () => filtrosApi.conveniosGrupo(f, soloNt),
+    staleTime: FIVE_MIN,
+  });
+}
+
+export function useConveniosJerarquia(f: DashboardFilters = {}, soloNt = false): UseQueryResult<ConvenioJerarquia[]> {
+  return useQuery({
+    // Jerarquia Grupo->Convenio: depende de los demas filtros, NO de convenio/convenioDetalle.
+    queryKey: ['filtros', 'convenios-jerarquia', soloNt, f.sede ?? '', f.sedeGrupo ?? '', f.desde ?? '', f.hasta ?? '', f.modalidad ?? '', f.regimen ?? '', f.grupoEspecialidad ?? ''],
+    queryFn: () => filtrosApi.conveniosJerarquia(f, soloNt),
     staleTime: FIVE_MIN,
   });
 }

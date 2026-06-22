@@ -30,6 +30,12 @@ export class DashboardFiltersDto {
   @IsString()
   convenio?: string;
 
+  /** Convenio especifico (costos.nombre_convenio, NUEVA EPS unificado).
+   *  Detalle dentro del agrupador `convenio`. */
+  @IsOptional()
+  @IsString()
+  convenioDetalle?: string;
+
   /** Agrupador de sede (costos.sede_grupo). Ej: CAJICA, CHIA, GENERAL. */
   @IsOptional()
   @IsString()

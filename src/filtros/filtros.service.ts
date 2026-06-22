@@ -222,6 +222,62 @@ export class FiltrosService {
       .sort((a, b) => b.citas - a.citas);
   }
 
+  /**
+   * Jerarquia Grupo comercial -> Convenio. Cada convenio_grupo lista sus
+   * convenios (nombre_convenio normalizado: NUEVA EPS unificado, igual que el
+   * mapa de calor). Espejo de getSedesJerarquia. Facetado y `soloNt` igual que
+   * los demas filtros; excluye `convenio` y `convenioDetalle` del WHERE.
+   */
+  async getConveniosJerarquia(
+    filters: DashboardFiltersDto = {},
+    soloNt = false,
+  ): Promise<
+    Array<{
+      value: string;
+      label: string;
+      citas: number;
+      convenios: Array<{ value: string; label: string; citas: number }>;
+    }>
+  > {
+    const MIN_CITAS_CONV = 50;
+    const { convenio: _g, convenioDetalle: _d, ...rest } = filters;
+    const { whereSql } = buildCostosWhere(rest);
+    const rows = await this.prisma.$queryRaw<
+      Array<{ convenio_grupo: string; convenio: string; n: bigint }>
+    >(
+      Prisma.sql`
+        SELECT convenio_grupo,
+               (CASE WHEN c.nombre_convenio LIKE 'NUEVA EPS%' THEN 'NUEVA EPS' ELSE c.nombre_convenio END) AS convenio,
+               COUNT(*) AS n
+        FROM costos c ${whereSql}
+          AND convenio_grupo IS NOT NULL AND convenio_grupo <> ''
+          AND c.nombre_convenio IS NOT NULL AND c.nombre_convenio <> ''
+          ${ntFiltro(soloNt)}
+        GROUP BY convenio_grupo, convenio
+        ORDER BY convenio_grupo, n DESC
+      `,
+    );
+
+    const map = new Map<
+      string,
+      { citas: number; convenios: Array<{ value: string; label: string; citas: number }> }
+    >();
+    for (const r of rows) {
+      const grupo = map.get(r.convenio_grupo) ?? { citas: 0, convenios: [] };
+      const n = Number(r.n);
+      grupo.citas += n;
+      // Solo convenios con volumen relevante (descarta residuales).
+      if (r.convenio && n >= MIN_CITAS_CONV) {
+        grupo.convenios.push({ value: r.convenio, label: r.convenio, citas: n });
+      }
+      map.set(r.convenio_grupo, grupo);
+    }
+
+    return Array.from(map.entries())
+      .map(([grupo, v]) => ({ value: grupo, label: grupo, citas: v.citas, convenios: v.convenios }))
+      .sort((a, b) => b.citas - a.citas);
+  }
+
   /** Modalidades contractuales (costos.modalidad, ej. PGP, CAPITA, EVENTO).
    *  Facetado: solo las presentes bajo los demas filtros. Excluye `modalidad`. */
   async getModalidades(

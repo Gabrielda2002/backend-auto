@@ -6,6 +6,7 @@ const URL_KEYS = [
   'hasta',
   'sede',
   'convenio',
+  'convenioDetalle',
   'sedeGrupo',
   'modalidad',
   'regimen',
@@ -24,6 +25,7 @@ export function useGlobalFiltersFromUrl(): {
   setFilter: (key: UrlKey, value: string | undefined) => void;
   setSede: (sede: string) => void;
   setSedeFilter: (sedeGrupo: string, sede: string) => void;
+  setConvenioFilter: (convenio: string, convenioDetalle: string) => void;
   setRango: (desde?: string, hasta?: string) => void;
   resetAll: () => void;
 } {
@@ -56,6 +58,13 @@ export function useGlobalFiltersFromUrl(): {
       const next = new URLSearchParams(params);
       writeParam(next, 'sedeGrupo', sedeGrupo);
       writeParam(next, 'sede', sede);
+      setParams(next, { replace: true });
+    },
+    setConvenioFilter(convenio, convenioDetalle) {
+      // Escribe grupo (convenio) y convenio especifico (convenioDetalle) juntos.
+      const next = new URLSearchParams(params);
+      writeParam(next, 'convenio', convenio);
+      writeParam(next, 'convenioDetalle', convenioDetalle);
       setParams(next, { replace: true });
     },
     setRango(desde, hasta) {

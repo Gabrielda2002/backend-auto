@@ -56,6 +56,8 @@ export interface DashboardFilters {
   sede?: string;
   /** Agrupador comercial (costos.convenio_grupo). */
   convenio?: string;
+  /** Convenio especifico (costos.nombre_convenio, NUEVA EPS unificado). */
+  convenioDetalle?: string;
   /** Agrupador de sede (costos.sede_grupo). */
   sedeGrupo?: string;
   /** Modalidad contractual (costos.modalidad). */

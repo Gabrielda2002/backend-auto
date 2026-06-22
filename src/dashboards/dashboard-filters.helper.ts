@@ -41,6 +41,12 @@ export function buildCostosWhere(filters: DashboardFiltersDto): {
   if (isActive(filters.convenio)) {
     parts.push(Prisma.sql`c.convenio_grupo = ${filters.convenio}`);
   }
+  if (isActive(filters.convenioDetalle)) {
+    // Detalle del convenio con NUEVA EPS unificado (mismo criterio que convNt).
+    parts.push(
+      Prisma.sql`(CASE WHEN c.nombre_convenio LIKE 'NUEVA EPS%' THEN 'NUEVA EPS' ELSE c.nombre_convenio END) = ${filters.convenioDetalle}`,
+    );
+  }
   if (isActive(filters.sedeGrupo)) {
     parts.push(Prisma.sql`c.sede_grupo = ${filters.sedeGrupo}`);
   }

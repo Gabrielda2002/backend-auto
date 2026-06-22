@@ -26,6 +26,11 @@ const SedeJerarquia = SedeOption.extend({
 });
 export type SedeJerarquia = z.infer<typeof SedeJerarquia>;
 
+const ConvenioJerarquia = SedeOption.extend({
+  convenios: z.array(SedeOption),
+});
+export type ConvenioJerarquia = z.infer<typeof ConvenioJerarquia>;
+
 export const filtrosApi = {
   sedes: () => get('/filtros/sedes', z.array(SedeOption)),
   convenios: () => get('/filtros/convenios', z.array(ConvenioOption)),
@@ -36,6 +41,8 @@ export const filtrosApi = {
     get('/filtros/sedes-grupo', z.array(SedeOption), soloNt ? { ...f, soloNt: 'true' } : f),
   sedesJerarquia: (f: DashboardFilters = {}, soloNt = false) =>
     get('/filtros/sedes-jerarquia', z.array(SedeJerarquia), soloNt ? { ...f, soloNt: 'true' } : f),
+  conveniosJerarquia: (f: DashboardFilters = {}, soloNt = false) =>
+    get('/filtros/convenios-jerarquia', z.array(ConvenioJerarquia), soloNt ? { ...f, soloNt: 'true' } : f),
   modalidades: (f: DashboardFilters = {}, soloNt = false) =>
     get('/filtros/modalidades', z.array(SedeOption), soloNt ? { ...f, soloNt: 'true' } : f),
   regimenes: (f: DashboardFilters = {}, soloNt = false) =>
