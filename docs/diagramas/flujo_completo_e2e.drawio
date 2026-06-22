@@ -1,0 +1,208 @@
+<mxfile host="app.diagrams.net" agent="Nordvital ETL+Dashboard" version="24.0.0">
+  <diagram id="flujo-e2e" name="Flujo E2E Nordvital">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITULO -->
+        <mxCell id="title" value="Nordvital IPS — Flujo de datos end-to-end:  Orígenes → ETL → costos / nt_map → API NestJS → 5 Dashboards" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1a1a1a;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="1860" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== BANDAS DE FASE (fondo) ===================== -->
+        <mxCell id="band1" value="1 · ORÍGENES" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#9fc0e8;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#2a5d8f;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="30" y="70" width="210" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="band2" value="2 · STAGING (CSV maestros)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ecf7ea;strokeColor=#aed5a3;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3d7a2e;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="260" y="70" width="210" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="band3" value="3 · RAW (MySQL)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fdf1e4;strokeColor=#e9c08a;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#9c6b16;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="490" y="70" width="210" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="band4" value="4 · TRANSFORMACIÓN ETL  ·  04_insert_costos.sql" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3eef8;strokeColor=#c6abdc;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#6b4d8c;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="720" y="70" width="300" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="band5" value="5 · MODELO CONSOLIDADO" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fdecec;strokeColor=#f0bdba;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#9c3d38;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="70" width="240" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="band6" value="6 · API NestJS  (/api)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#9fc0e8;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#2a5d8f;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="70" width="250" height="820" as="geometry" />
+        </mxCell>
+        <mxCell id="band7" value="7 · FRONTEND  (Vite + React)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ecf7ea;strokeColor=#aed5a3;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3d7a2e;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="1570" y="70" width="250" height="820" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 1 · ORÍGENES ===================== -->
+        <mxCell id="src_plenus" value="&lt;b&gt;PLENUS&lt;/b&gt;&lt;br&gt;Sistema clínico&lt;br&gt;CSV TAB · ~190k&lt;br&gt;clave: agendacita_id" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="130" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="src_pana" value="&lt;b&gt;PANA&lt;/b&gt;&lt;br&gt;Agenda secundaria&lt;br&gt;CSV «;» · ~119k&lt;br&gt;clave: codigo_cita" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="300" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="src_sap" value="&lt;b&gt;SAP&lt;/b&gt;&lt;br&gt;Sistema administrativo&lt;br&gt;Excel Hoja1 · ~71.5k&lt;br&gt;clave: episodio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="470" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bots" value="&lt;b&gt;Bots de descarga&lt;/b&gt;&lt;br&gt;Citas_PLENUS.py (Playwright)&lt;br&gt;Citas_PANA.py (Playwright)&lt;br&gt;Citas_SAP.py (PyAutoGUI)&lt;br&gt;→ data/descarga_diaria/" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="45" y="650" width="180" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 2 · STAGING ===================== -->
+        <mxCell id="csv_plenus" value="&lt;b&gt;Raw_PLENUS.csv&lt;/b&gt;&lt;br&gt;separador TAB&lt;br&gt;append-only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="275" y="130" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="csv_pana" value="&lt;b&gt;Raw_PANA.csv&lt;/b&gt;&lt;br&gt;separador «;»&lt;br&gt;append-only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="275" y="300" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="csv_sap" value="&lt;b&gt;Raw_SAP.xlsx&lt;/b&gt;&lt;br&gt;Excel Hoja1&lt;br&gt;append-only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="275" y="470" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="note_append" value="&lt;b&gt;01_carga_diaria_csv.py&lt;/b&gt;&lt;br&gt;Append incremental de las descargas a los maestros.&lt;br&gt;⚠ Sin deduplicación: rangos solapados pueden duplicar citas." style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="275" y="650" width="180" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 3 · RAW MySQL ===================== -->
+        <mxCell id="raw_plenus" value="&lt;b&gt;raw_plenus&lt;/b&gt;&lt;br&gt;56 columnas" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="525" y="130" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="raw_pana" value="&lt;b&gt;raw_pana&lt;/b&gt;&lt;br&gt;46 columnas" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="525" y="300" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="raw_sap" value="&lt;b&gt;raw_sap&lt;/b&gt;&lt;br&gt;58 columnas" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="525" y="470" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="note_load" value="&lt;b&gt;03_carga_diaria_DB.py&lt;/b&gt;&lt;br&gt;TRUNCATE + carga por chunks (2000).&lt;br&gt;Luego ejecuta 04_insert_costos.sql.&lt;br&gt;Modos: --solo-raw / --solo-costos" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="510" y="650" width="180" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 4 · ETL TRANSFORM ===================== -->
+        <mxCell id="bloque1" value="&lt;b&gt;BLOQUE 1 · PLENUS → costos&lt;/b&gt;&lt;br&gt;JOIN catálogos · CUPS homologado · tipo_cita" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="735" y="120" width="270" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="bloque2" value="&lt;b&gt;BLOQUE 2 · PANA → costos&lt;/b&gt;&lt;br&gt;Regla NORDVITAL IPS SAS → NUEVA EPS&lt;br&gt;CUPS por (especialidad_cita, control)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="735" y="180" width="270" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="bloque3" value="&lt;b&gt;BLOQUE 3 · SAP → costos&lt;/b&gt;&lt;br&gt;Clave compuesta (sede_uo, cod_aseg, interloc.)&lt;br&gt;prestación pos 9-16 = CUPS · 9-12 = tipo" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="735" y="247" width="270" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="bloque4" value="&lt;b&gt;BLOQUE 4 · UPDATE grupo_especialidad&lt;/b&gt;&lt;br&gt;CASE por LIKE → 7 grupos (+OTROS)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="735" y="314" width="270" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="bloque5" value="&lt;b&gt;BLOQUE 5 · UPDATE nombre_sede&lt;/b&gt;&lt;br&gt;Cúcuta: Calle 8→Sede 07 · CL 14→Sede 06&lt;br&gt;Calle 15→Sede 04 · Sede 3/3E→Sede 03" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="735" y="367" width="270" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="catalogos" value="&lt;b&gt;Catálogos cat_* (normalización)&lt;/b&gt;&lt;br&gt;cat_estado_cita · cat_sede · cat_regimen&lt;br&gt;cat_convenio · cat_convenio_sap&lt;br&gt;cat_cups · cat_cups_pana · cat_especialidad&lt;br&gt;cat_convenio_agrupador (convenio/sede/modalidad/régimen)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=6;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="735" y="455" width="270" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="note_estado" value="&lt;b&gt;Regla de estado (cat_estado_cita)&lt;/b&gt;&lt;br&gt;REAL · PLAN · AUTORIZADO · ACTIVO → CUMPLIDA&lt;br&gt;INCUMPLIDO · # · NO CONFIRMADA → INCUMPLIDA&lt;br&gt;CITA CANCELADA → CANCELADA" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="735" y="650" width="270" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 5 · MODELO ===================== -->
+        <mxCell id="costos" value="&lt;b&gt;costos&lt;/b&gt; (tabla maestra)&lt;br&gt;~381k filas · 40 columnas&lt;br&gt;&lt;br&gt;fuente · fecha_cita · estado_consulta&lt;br&gt;cups · nombre_convenio · nombre_sede&lt;br&gt;especialidad · grupo_especialidad&lt;br&gt;&lt;br&gt;&lt;i&gt;agrupadores:&lt;/i&gt; convenio_grupo · sede_grupo&lt;br&gt;modalidad · regimen_grupo" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;boundedLbl=1;backgroundOutline=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1055" y="120" width="210" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="notas_tecnicas" value="&lt;b&gt;notas_tecnicas&lt;/b&gt;&lt;br&gt;Metas por CUPS y convenio&lt;br&gt;n_eventos_mes · costo_medio_evento" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="1055" y="400" width="210" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="nt_map" value="&lt;b&gt;nt_map&lt;/b&gt; (tabla puente)&lt;br&gt;clave (cups, nombre_convenio)&lt;br&gt;meta_mes · costo_medio&lt;br&gt;duplica filas «/ SUBSIDIADO»&lt;br&gt;→ CONTRIBUTIVO + SUBSIDIADO" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="1055" y="540" width="210" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 6 · API ===================== -->
+        <mxCell id="ep_resumen" value="GET /dashboards/&lt;b&gt;resumen&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="115" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_ejec" value="GET /dashboards/&lt;b&gt;ejecucion-nt&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="168" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_fin" value="GET /dashboards/&lt;b&gt;financiero&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="221" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_cal" value="GET /dashboards/&lt;b&gt;calidad&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="274" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_pym" value="GET /dashboards/&lt;b&gt;pym&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="327" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_filtros" value="GET /filtros/* (facetados)&lt;br&gt;sedes-jerarquia · convenios-grupo&lt;br&gt;modalidades · regimenes · grupos-especialidad" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="385" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="note_api" value="&lt;b&gt;Cálculos clave (dashboards.service.ts)&lt;/b&gt;&lt;br&gt;• buildCostosWhere → WHERE parametrizado&lt;br&gt;• cumplimiento = CUMPLIDA / con_estado&lt;br&gt;• ejecución = citas / (meta_mes × meses)&lt;br&gt;• costo = Σ nt_map.costo_medio (JOIN cups+conv)&lt;br&gt;• &lt;b&gt;solo-NT&lt;/b&gt;: excluye eventos sin meta (nivel cita)&lt;br&gt;• ⚠ meses = 5 (Ene-May 2026) en varias queries" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="470" width="220" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== FASE 7 · FRONTEND ===================== -->
+        <mxCell id="pg_resumen" value="&lt;b&gt;Resumen de Citas&lt;/b&gt;&lt;br&gt;3 KPIs · evolución · cumplimiento" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1585" y="110" width="220" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_ejec" value="&lt;b&gt;Ejecución vs Nota Técnica&lt;/b&gt;&lt;br&gt;heatmap convenio×CUPS · catálogo NT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1585" y="166" width="220" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_fin" value="&lt;b&gt;Análisis Financiero&lt;/b&gt;&lt;br&gt;costo real vs NT · Pareto CUPS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1585" y="222" width="220" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_cal" value="&lt;b&gt;Calidad y Oportunidad&lt;/b&gt;&lt;br&gt;oportunidad · estados/sede · inasistencia" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1585" y="278" width="220" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="pg_pym" value="&lt;b&gt;PyM / RIAS&lt;/b&gt;&lt;br&gt;top programas · alertas cohortes&lt;br&gt;⚠ grupo etario pendiente (Fase A)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1585" y="334" width="220" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="note_front" value="&lt;b&gt;Cadena de render&lt;/b&gt;&lt;br&gt;página → hook TanStack Query → cliente API&lt;br&gt;→ fetch /api/... → validación Zod → charts&lt;br&gt;&lt;br&gt;Filtros sincronizados a la URL (single-select):&lt;br&gt;periodo · sede (Ciudad→Sede) · convenio&lt;br&gt;modalidad · régimen · grupo especialidad&lt;br&gt;&lt;br&gt;soloConveniosNt propagado en 4 de 5 páginas&lt;br&gt;(financiero usa todos los convenios)" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="1585" y="430" width="220" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== EDGES: flujo principal ===================== -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#6c8ebf;" edge="1" parent="1" source="src_plenus" target="csv_plenus"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#6c8ebf;" edge="1" parent="1" source="src_pana" target="csv_pana"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#6c8ebf;" edge="1" parent="1" source="src_sap" target="csv_sap"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="csv_plenus" target="raw_plenus"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="csv_pana" target="raw_pana"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="csv_sap" target="raw_sap"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#d79b00;" edge="1" parent="1" source="raw_plenus" target="bloque1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#d79b00;" edge="1" parent="1" source="raw_pana" target="bloque2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#d79b00;" edge="1" parent="1" source="raw_sap" target="bloque3"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- catálogos alimentan la transformación -->
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#666666;" edge="1" parent="1" source="catalogos" target="bloque3"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- bloques → costos -->
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673a6;" edge="1" parent="1" source="bloque1" target="costos"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673a6;" edge="1" parent="1" source="bloque2" target="costos"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#9673a6;" edge="1" parent="1" source="bloque3" target="costos"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;dashed=1;strokeColor=#9673a6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="bloque4" target="costos"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;dashed=1;strokeColor=#9673a6;" edge="1" parent="1" source="bloque5" target="costos"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- notas_tecnicas → nt_map -->
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#d6b656;" edge="1" parent="1" source="notas_tecnicas" target="nt_map"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- costos → endpoints -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="costos" target="ep_resumen"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="costos" target="ep_ejec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="costos" target="ep_fin"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="costos" target="ep_cal"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="costos" target="ep_pym"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- nt_map → ejecución y financiero (metas/costo) -->
+        <mxCell id="e22" value="JOIN metas" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#d6b656;fontSize=8;" edge="1" parent="1" source="nt_map" target="ep_ejec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e23" value="JOIN costo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#d6b656;fontSize=8;" edge="1" parent="1" source="nt_map" target="ep_fin"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- endpoints → páginas -->
+        <mxCell id="e24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="ep_resumen" target="pg_resumen"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="ep_ejec" target="pg_ejec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="ep_fin" target="pg_fin"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="ep_cal" target="pg_cal"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#82b366;" edge="1" parent="1" source="ep_pym" target="pg_pym"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- filtros → frontend filtros -->
+        <mxCell id="e29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="ep_filtros" target="note_front"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- bots → staging (proceso) -->
+        <mxCell id="e30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;strokeColor=#d6b656;" edge="1" parent="1" source="bots" target="note_append"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

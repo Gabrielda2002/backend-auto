@@ -13,9 +13,12 @@ export class PrismaService
       host: configService.get<string>('DB_HOST', 'localhost'),
       port: configService.get<number>('DB_PORT', 3306),
       user: configService.get<string>('DB_USER', 'root'),
-      password: configService.get<string>('DB_PASSWORD', ''),
+      // Acepta DB_PASS (legado ETL) o DB_PASSWORD
+      password:
+        configService.get<string>('DB_PASS') ??
+        configService.get<string>('DB_PASSWORD', ''),
       database: configService.get<string>('DB_NAME', 'citas_db'),
-      connectionLimit: 5,
+      connectionLimit: 10,
     });
     super({ adapter });
   }

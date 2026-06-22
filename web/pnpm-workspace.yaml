@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild
+# Evita el chequeo de dependencias previo a `pnpm run` que falla mientras
+# haya build scripts sin aprobar (bloquearia `pnpm dev`).
+verifyDepsBeforeRun: false

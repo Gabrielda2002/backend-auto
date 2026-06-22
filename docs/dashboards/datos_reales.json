@@ -1,0 +1,2536 @@
+{
+  "meta": {
+    "fecha_min": "2026-01-02",
+    "fecha_max": "2026-05-28",
+    "total_citas": 225717,
+    "scope": "funcionalidad='CONSULTA'"
+  },
+  "resumen_gerencial": {
+    "kpi_cumplimiento": {
+      "pct": 41.5,
+      "cumplidas": 67988.0,
+      "con_estado": 164006.0
+    },
+    "kpi_recuperacion": {
+      "millones": 85.2
+    },
+    "kpi_convenios_riesgo": {
+      "n": 24
+    },
+    "kpi_oportunidad": {
+      "dias": 3.4
+    },
+    "evolucion_mensual": [
+      {
+        "mes": "2026-01",
+        "citas": 45904,
+        "cumplidas": 13114.0
+      },
+      {
+        "mes": "2026-02",
+        "citas": 51307,
+        "cumplidas": 14145.0
+      },
+      {
+        "mes": "2026-03",
+        "citas": 49019,
+        "cumplidas": 11738.0
+      },
+      {
+        "mes": "2026-04",
+        "citas": 43978,
+        "cumplidas": 19597.0
+      },
+      {
+        "mes": "2026-05",
+        "citas": 35509,
+        "cumplidas": 9394.0
+      }
+    ],
+    "distribucion_servicios": [
+      {
+        "tipo": "CONSULTA",
+        "n": 225717
+      },
+      {
+        "tipo": "PROCEDIMIENTO",
+        "n": 118721
+      }
+    ],
+    "cumplimiento_top_convenios": [
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "citas": 71459,
+        "pct": 0.0
+      },
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "citas": 16697,
+        "pct": 62.4
+      },
+      {
+        "nombre_convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "citas": 16641,
+        "pct": 59.7
+      },
+      {
+        "nombre_convenio": "COOSALUD CAPITA CONTRIBUTIVO",
+        "citas": 16311,
+        "pct": 68.5
+      },
+      {
+        "nombre_convenio": "COOSALUD CAPITA SUBSIDIADO",
+        "citas": 15604,
+        "pct": 68.2
+      }
+    ],
+    "costo_por_sede": [
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 07",
+        "millones": null,
+        "citas": 50684
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 04",
+        "millones": null,
+        "citas": 928
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 01",
+        "millones": null,
+        "citas": 35
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE LA CALERA",
+        "millones": null,
+        "citas": 8633
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE CHIA",
+        "millones": null,
+        "citas": 22059
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 06",
+        "millones": null,
+        "citas": 10208
+      }
+    ]
+  },
+  "ejecucion_nt": {
+    "_info": "NT vigente notas_tecnicas (oct/2025 - may/2026, 7700 filas, 11 convenios)",
+    "kpi_cumplimiento_global": {
+      "ejecutado": 102944.0,
+      "meta_periodo": 279619.0,
+      "pct_cumplimiento": 36.8
+    },
+    "heatmap_convenio_cups": [
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 568,
+        "ejecutado": 2036,
+        "meses": 5,
+        "pct": 71.7
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 319,
+        "ejecutado": 878,
+        "meses": 4,
+        "pct": 68.8
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 1300,
+        "ejecutado": 2270,
+        "meses": 5,
+        "pct": 34.9
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 606,
+        "ejecutado": 200,
+        "meses": 4,
+        "pct": 8.3
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 1,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 1122,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 208,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 343,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 568,
+        "ejecutado": 382,
+        "meses": 5,
+        "pct": 13.5
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 319,
+        "ejecutado": 40,
+        "meses": 4,
+        "pct": 3.1
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 1300,
+        "ejecutado": 438,
+        "meses": 5,
+        "pct": 6.7
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 606,
+        "ejecutado": 15,
+        "meses": 4,
+        "pct": 0.6
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 1,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "931001",
+        "meta_mes": 1122,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 208,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 343,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 135,
+        "ejecutado": 487,
+        "meses": 5,
+        "pct": 72.1
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 96,
+        "ejecutado": 450,
+        "meses": 5,
+        "pct": 93.8
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 186,
+        "ejecutado": 1942,
+        "meses": 5,
+        "pct": 208.8
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 70,
+        "ejecutado": 301,
+        "meses": 5,
+        "pct": 86.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 8,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 33,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 123,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 135,
+        "ejecutado": 56,
+        "meses": 5,
+        "pct": 8.3
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 96,
+        "ejecutado": 83,
+        "meses": 5,
+        "pct": 17.3
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 186,
+        "ejecutado": 588,
+        "meses": 5,
+        "pct": 63.2
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 70,
+        "ejecutado": 79,
+        "meses": 5,
+        "pct": 22.6
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 8,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 33,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 123,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 386,
+        "ejecutado": 508,
+        "meses": 5,
+        "pct": 26.3
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 161,
+        "ejecutado": 934,
+        "meses": 5,
+        "pct": 116.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 501,
+        "ejecutado": 1708,
+        "meses": 5,
+        "pct": 68.2
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 324,
+        "ejecutado": 820,
+        "meses": 5,
+        "pct": 50.6
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 144,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 398,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 0,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": null
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 118,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 386,
+        "ejecutado": 268,
+        "meses": 5,
+        "pct": 13.9
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 161,
+        "ejecutado": 383,
+        "meses": 5,
+        "pct": 47.6
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 501,
+        "ejecutado": 845,
+        "meses": 5,
+        "pct": 33.7
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 324,
+        "ejecutado": 525,
+        "meses": 5,
+        "pct": 32.4
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 144,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "931001",
+        "meta_mes": 398,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 0,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": null
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 118,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 341,
+        "ejecutado": 600,
+        "meses": 5,
+        "pct": 35.2
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 158,
+        "ejecutado": 870,
+        "meses": 5,
+        "pct": 110.1
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 699,
+        "ejecutado": 3170,
+        "meses": 5,
+        "pct": 90.7
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 392,
+        "ejecutado": 2283,
+        "meses": 5,
+        "pct": 116.5
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 30,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 559,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 167,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 110,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 341,
+        "ejecutado": 130,
+        "meses": 5,
+        "pct": 7.6
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 158,
+        "ejecutado": 123,
+        "meses": 5,
+        "pct": 15.6
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 699,
+        "ejecutado": 776,
+        "meses": 5,
+        "pct": 22.2
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 392,
+        "ejecutado": 848,
+        "meses": 5,
+        "pct": 43.3
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 30,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "931001",
+        "meta_mes": 559,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 167,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 110,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 578,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 171,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 955,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 174,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 221,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 184,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 57,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 66,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 13,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 28,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 18,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 5,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 55,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 36,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 8,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 29,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 77,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 3,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 2,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 5,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 6,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 20,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 87,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 8,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 13,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 18,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 29,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 77,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 3,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 2,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 5,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 6,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 20,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 8,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 27,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 30,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 146,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 21,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 10,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 47,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 11,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 107,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 23,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 45,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 76,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 190,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 41,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 39,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 52,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 90,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 137,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 179,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 3,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 132,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 59,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 59,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 47,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 77,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 19,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 23,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 50,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 45,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 112,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 238,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 90,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 90,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 179,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 47,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 77,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 19,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 23,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 50,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 45,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 112,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 90,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 50,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 194,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 109,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 28,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 36,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 51,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 62,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 199,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 89,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 53,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 86,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 187,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA PYMS SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 86,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 484,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 196,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 1362,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 323,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 385,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "931001",
+        "meta_mes": 120,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 1995,
+        "ejecutado": 3105,
+        "meses": 4,
+        "pct": 38.9
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 995,
+        "ejecutado": 1868,
+        "meses": 4,
+        "pct": 46.9
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 1035,
+        "ejecutado": 2662,
+        "meses": 4,
+        "pct": 64.3
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 370,
+        "ejecutado": 157,
+        "meses": 4,
+        "pct": 10.6
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 415,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 358,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 655,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 635,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 1995,
+        "ejecutado": 724,
+        "meses": 4,
+        "pct": 9.1
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 995,
+        "ejecutado": 424,
+        "meses": 4,
+        "pct": 10.7
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 1035,
+        "ejecutado": 611,
+        "meses": 4,
+        "pct": 14.8
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 370,
+        "ejecutado": 36,
+        "meses": 4,
+        "pct": 2.4
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 415,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "931001",
+        "meta_mes": 358,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 655,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 635,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 3343,
+        "ejecutado": 5450,
+        "meses": 5,
+        "pct": 32.6
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 1680,
+        "ejecutado": 2944,
+        "meses": 4,
+        "pct": 43.8
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 1734,
+        "ejecutado": 4880,
+        "meses": 4,
+        "pct": 70.4
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 622,
+        "ejecutado": 417,
+        "meses": 4,
+        "pct": 16.8
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 689,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 600,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 1124,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 1079,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "890201",
+        "meta_mes": 3343,
+        "ejecutado": 1724,
+        "meses": 4,
+        "pct": 12.9
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "890203",
+        "meta_mes": 1680,
+        "ejecutado": 885,
+        "meses": 4,
+        "pct": 13.2
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "890301",
+        "meta_mes": 1734,
+        "ejecutado": 1466,
+        "meses": 4,
+        "pct": 21.1
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "890303",
+        "meta_mes": 622,
+        "ejecutado": 121,
+        "meses": 4,
+        "pct": 4.9
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "903841",
+        "meta_mes": 689,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "931001",
+        "meta_mes": 600,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "997002",
+        "meta_mes": 1124,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "cups": "997301",
+        "meta_mes": 1079,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "890201",
+        "meta_mes": 4292,
+        "ejecutado": 5537,
+        "meses": 5,
+        "pct": 25.8
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "890203",
+        "meta_mes": 1449,
+        "ejecutado": 1479,
+        "meses": 2,
+        "pct": 51.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "890301",
+        "meta_mes": 4093,
+        "ejecutado": 2960,
+        "meses": 4,
+        "pct": 18.1
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "890303",
+        "meta_mes": 1101,
+        "ejecutado": 684,
+        "meses": 1,
+        "pct": 62.1
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "903841",
+        "meta_mes": 2036,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "931001",
+        "meta_mes": 4208,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "997002",
+        "meta_mes": 704,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "997301",
+        "meta_mes": 983,
+        "ejecutado": 0,
+        "meses": 5,
+        "pct": 0.0
+      }
+    ],
+    "desviaciones": [
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "cups": "890301",
+        "descripcion": "CONSULTA DE CONTROL O DE SEGUIMIENTO POR MEDICINA GENERAL +",
+        "meta": 930,
+        "ejecutado": 1942,
+        "pct": 208.8
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "cups": "903895",
+        "descripcion": "CREATININA EN SUERO U OTROS FLUIDOS",
+        "meta": 1155,
+        "ejecutado": 0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "cups": "903856",
+        "descripcion": "NITROGENO UREICO [BUN] *+",
+        "meta": 1170,
+        "ejecutado": 0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COOSALUD CUCUTA CAPITA SUBSIDIADO",
+        "cups": "903426",
+        "descripcion": "HEMOGLOBINA GLICOSILADA AUTOMATIZADA",
+        "meta": 745,
+        "ejecutado": 0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "cups": "993510",
+        "descripcion": "VACUNACION CONTRA INFLUENZA",
+        "meta": 1365,
+        "ejecutado": 0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "cups": "232102",
+        "descripcion": "OBTURACION DENTAL CON RESINA DE FOTOCURADO +",
+        "meta": 1720,
+        "ejecutado": 0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "cups": "943102",
+        "descripcion": "PSICOTERAPIA INDIVIDUAL POR PSICOLOGIA",
+        "meta": 705,
+        "ejecutado": 0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "cups": "997301",
+        "descripcion": "DETARTRAJE SUPRAGINGIVAL",
+        "meta": 1715,
+        "ejecutado": 0,
+        "pct": 0.0
+      }
+    ],
+    "tendencia_cumplimiento": [
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "mes": "2026-01",
+        "ejecutado": 2851,
+        "meta_mes": 11097.0,
+        "pct": 25.7
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 3147,
+        "meta_mes": 11097.0,
+        "pct": 28.4
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 3417,
+        "meta_mes": 11097.0,
+        "pct": 30.8
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 3247,
+        "meta_mes": 11097.0,
+        "pct": 29.3
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 2716,
+        "meta_mes": 11097.0,
+        "pct": 24.5
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "mes": "2026-01",
+        "ejecutado": 593,
+        "meta_mes": 11097.0,
+        "pct": 5.3
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "mes": "2026-02",
+        "ejecutado": 612,
+        "meta_mes": 11097.0,
+        "pct": 5.5
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "mes": "2026-03",
+        "ejecutado": 641,
+        "meta_mes": 11097.0,
+        "pct": 5.8
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "mes": "2026-04",
+        "ejecutado": 586,
+        "meta_mes": 11097.0,
+        "pct": 5.3
+      },
+      {
+        "convenio": "COMPENSAR CAJICA PGP SUBSIDIADO",
+        "mes": "2026-05",
+        "ejecutado": 487,
+        "meta_mes": 11097.0,
+        "pct": 4.4
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "mes": "2026-01",
+        "ejecutado": 1107,
+        "meta_mes": 3590.0,
+        "pct": 30.8
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 1293,
+        "meta_mes": 3590.0,
+        "pct": 36.0
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 1465,
+        "meta_mes": 3590.0,
+        "pct": 40.8
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 1349,
+        "meta_mes": 3590.0,
+        "pct": 37.6
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 1297,
+        "meta_mes": 3590.0,
+        "pct": 36.1
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "mes": "2026-01",
+        "ejecutado": 294,
+        "meta_mes": 3590.0,
+        "pct": 8.2
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "mes": "2026-02",
+        "ejecutado": 370,
+        "meta_mes": 3590.0,
+        "pct": 10.3
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "mes": "2026-03",
+        "ejecutado": 390,
+        "meta_mes": 3590.0,
+        "pct": 10.9
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "mes": "2026-04",
+        "ejecutado": 423,
+        "meta_mes": 3590.0,
+        "pct": 11.8
+      },
+      {
+        "convenio": "COMPENSAR LA CALERA PGP SUBSIDIADO",
+        "mes": "2026-05",
+        "ejecutado": 290,
+        "meta_mes": 3590.0,
+        "pct": 8.1
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "mes": "2026-01",
+        "ejecutado": 1464,
+        "meta_mes": 5488.0,
+        "pct": 26.7
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 2128,
+        "meta_mes": 5488.0,
+        "pct": 38.8
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 2021,
+        "meta_mes": 5488.0,
+        "pct": 36.8
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 1869,
+        "meta_mes": 5488.0,
+        "pct": 34.1
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 1713,
+        "meta_mes": 5488.0,
+        "pct": 31.2
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "mes": "2026-01",
+        "ejecutado": 788,
+        "meta_mes": 5488.0,
+        "pct": 14.4
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "mes": "2026-02",
+        "ejecutado": 1136,
+        "meta_mes": 5488.0,
+        "pct": 20.7
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "mes": "2026-03",
+        "ejecutado": 938,
+        "meta_mes": 5488.0,
+        "pct": 17.1
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "mes": "2026-04",
+        "ejecutado": 851,
+        "meta_mes": 5488.0,
+        "pct": 15.5
+      },
+      {
+        "convenio": "COMPENSAR LA MESA PGP SUBSIDIADO",
+        "mes": "2026-05",
+        "ejecutado": 838,
+        "meta_mes": 5488.0,
+        "pct": 15.3
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "mes": "2026-01",
+        "ejecutado": 2143,
+        "meta_mes": 8189.0,
+        "pct": 26.2
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 2839,
+        "meta_mes": 8189.0,
+        "pct": 34.7
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 3117,
+        "meta_mes": 8189.0,
+        "pct": 38.1
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 2545,
+        "meta_mes": 8189.0,
+        "pct": 31.1
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 2342,
+        "meta_mes": 8189.0,
+        "pct": 28.6
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "mes": "2026-01",
+        "ejecutado": 581,
+        "meta_mes": 8189.0,
+        "pct": 7.1
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "mes": "2026-02",
+        "ejecutado": 771,
+        "meta_mes": 8189.0,
+        "pct": 9.4
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "mes": "2026-03",
+        "ejecutado": 785,
+        "meta_mes": 8189.0,
+        "pct": 9.6
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "mes": "2026-04",
+        "ejecutado": 666,
+        "meta_mes": 8189.0,
+        "pct": 8.1
+      },
+      {
+        "convenio": "COMPENSAR UBATE PGP SUBSIDIADO",
+        "mes": "2026-05",
+        "ejecutado": 631,
+        "meta_mes": 8189.0,
+        "pct": 7.7
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 2706,
+        "meta_mes": 16183.0,
+        "pct": 16.7
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 2272,
+        "meta_mes": 16183.0,
+        "pct": 14.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 2349,
+        "meta_mes": 16183.0,
+        "pct": 14.5
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 2506,
+        "meta_mes": 16183.0,
+        "pct": 15.5
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "mes": "2026-02",
+        "ejecutado": 652,
+        "meta_mes": 16183.0,
+        "pct": 4.0
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "mes": "2026-03",
+        "ejecutado": 580,
+        "meta_mes": 16183.0,
+        "pct": 3.6
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "mes": "2026-04",
+        "ejecutado": 591,
+        "meta_mes": 16183.0,
+        "pct": 3.7
+      },
+      {
+        "convenio": "FAMISANAR CAJICA CAPITA SUBSIDIADO",
+        "mes": "2026-05",
+        "ejecutado": 588,
+        "meta_mes": 16183.0,
+        "pct": 3.6
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-01",
+        "ejecutado": 6,
+        "meta_mes": 26721.0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 4926,
+        "meta_mes": 26721.0,
+        "pct": 18.4
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 4606,
+        "meta_mes": 26721.0,
+        "pct": 17.2
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 3544,
+        "meta_mes": 26721.0,
+        "pct": 13.3
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 3615,
+        "meta_mes": 26721.0,
+        "pct": 13.5
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "mes": "2026-02",
+        "ejecutado": 1475,
+        "meta_mes": 26721.0,
+        "pct": 5.5
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "mes": "2026-03",
+        "ejecutado": 1417,
+        "meta_mes": 26721.0,
+        "pct": 5.3
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "mes": "2026-04",
+        "ejecutado": 1238,
+        "meta_mes": 26721.0,
+        "pct": 4.6
+      },
+      {
+        "convenio": "FAMISANAR CHIA CAPITA SUBSIDIADO",
+        "mes": "2026-05",
+        "ejecutado": 1234,
+        "meta_mes": 26721.0,
+        "pct": 4.6
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "mes": "2026-01",
+        "ejecutado": 8,
+        "meta_mes": 58624.0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "mes": "2026-02",
+        "ejecutado": 5,
+        "meta_mes": 58624.0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "mes": "2026-03",
+        "ejecutado": 4,
+        "meta_mes": 58624.0,
+        "pct": 0.0
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "mes": "2026-04",
+        "ejecutado": 14418,
+        "meta_mes": 58624.0,
+        "pct": 24.6
+      },
+      {
+        "convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "mes": "2026-05",
+        "ejecutado": 2206,
+        "meta_mes": 58624.0,
+        "pct": 3.8
+      }
+    ]
+  },
+  "financiero": {
+    "_info": "Costo = NT.costo_medio_evento x citas ejecutadas matcheadas con NT (via nt_map)",
+    "kpi_costo_real_ejecutado": {
+      "millones": 2547.3,
+      "citas_costeadas": 102944
+    },
+    "kpi_costo_esperado_nt": {
+      "millones": 24006.8
+    },
+    "kpi_recuperacion": {
+      "millones": 85.2
+    },
+    "kpi_eficiencia": {
+      "pct": 3.3
+    },
+    "pareto_cups": [
+      {
+        "cups": "890301",
+        "descripcion": "CONSULTA DE CONTROL O DE SEGUIMIENTO POR MEDICINA ",
+        "n": 24316,
+        "millones": 606.6
+      },
+      {
+        "cups": "890201",
+        "descripcion": "CONSULTA DE PRIMERA VEZ POR MEDICINA GENERAL",
+        "n": 21007,
+        "millones": 451.3
+      },
+      {
+        "cups": "890203",
+        "descripcion": "CONSULTA DE PRIMERA VEZ POR ODONTOLOGIA GENERAL",
+        "n": 11361,
+        "millones": 196.2
+      },
+      {
+        "cups": "890303",
+        "descripcion": "CONSULTA DE CONTROL O DE SEGUIMIENTO POR ODONTOLOG",
+        "n": 6486,
+        "millones": 137.1
+      },
+      {
+        "cups": "890383",
+        "descripcion": "CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALI",
+        "n": 1848,
+        "millones": 77.3
+      },
+      {
+        "cups": "890207",
+        "descripcion": "OPTOMETRÍA CONSULTA",
+        "n": 2415,
+        "millones": 74.4
+      },
+      {
+        "cups": "89020109",
+        "descripcion": "MEDICINA GENERAL ATENCION ESPECIFICA INTEGRAL",
+        "n": 2409,
+        "millones": 74.2
+      },
+      {
+        "cups": "890308",
+        "descripcion": "CONSULTA DE CONTROL O DE SEGUIMIENTO POR PSICOLOGI",
+        "n": 4074,
+        "millones": 69.3
+      },
+      {
+        "cups": "890283",
+        "descripcion": "CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN PEDIAT",
+        "n": 1560,
+        "millones": 61.1
+      },
+      {
+        "cups": "890366",
+        "descripcion": "CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALI",
+        "n": 1320,
+        "millones": 58.8
+      }
+    ],
+    "pareto_top20_pct": 87.7,
+    "costo_por_convenio": [
+      {
+        "nombre_convenio": "COMPENSAR UBATE PGP CONTRIBUTIVO",
+        "citas": 12811,
+        "millones": 395.4
+      },
+      {
+        "nombre_convenio": "COMPENSAR CAJICA PGP CONTRIBUTIVO",
+        "citas": 11612,
+        "millones": 363.4
+      },
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "citas": 16677,
+        "millones": 316.2
+      },
+      {
+        "nombre_convenio": "COMPENSAR LA MESA PGP CONTRIBUTIVO",
+        "citas": 9195,
+        "millones": 287.3
+      },
+      {
+        "nombre_convenio": "NUEVA EPS PGP CONTRIBUTIVO",
+        "citas": 16616,
+        "millones": 286.9
+      }
+    ],
+    "recuperacion_por_convenio": [
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "millones": 85.2
+      }
+    ]
+  },
+  "calidad": {
+    "oportunidad_especialidad": [
+      {
+        "especialidad": "MEDICINA GENERAL",
+        "n": 91300,
+        "dias": 2.2
+      },
+      {
+        "especialidad": "ODONTOLOGIA GENERAL",
+        "n": 14966,
+        "dias": 0.0
+      },
+      {
+        "especialidad": "CONSULTA DE CONTROL MEDICINA GENERAL",
+        "n": 11945,
+        "dias": 3.3
+      },
+      {
+        "especialidad": "ODONTOLOGIA",
+        "n": 11194,
+        "dias": 2.1
+      }
+    ],
+    "estado_por_sede": [
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 07",
+        "total": 50684,
+        "pct_cump": 67.3,
+        "pct_incump": 17.7,
+        "pct_canc": 15.0
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE CAJICA",
+        "total": 30886,
+        "pct_cump": 33.0,
+        "pct_incump": 19.4,
+        "pct_canc": 10.2
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE CHIA",
+        "total": 22059,
+        "pct_cump": 62.7,
+        "pct_incump": 13.1,
+        "pct_canc": 24.2
+      }
+    ],
+    "inasistencia_mensual": [
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-01",
+        "pct": 0.0
+      },
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-02",
+        "pct": 11.8
+      },
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-03",
+        "pct": 12.3
+      },
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-04",
+        "pct": 13.8
+      },
+      {
+        "nombre_convenio": "FAMISANAR CHIA CAPITA CONTRIBUTIVO",
+        "mes": "2026-05",
+        "pct": 12.4
+      },
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "mes": "2026-01",
+        "pct": 0.0
+      },
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "mes": "2026-02",
+        "pct": 0.0
+      },
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "mes": "2026-03",
+        "pct": 0.0
+      },
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "mes": "2026-04",
+        "pct": 0.0
+      },
+      {
+        "nombre_convenio": "NORDVITAL IPS SAS",
+        "mes": "2026-05",
+        "pct": 0.0
+      }
+    ],
+    "mix_agenda_por_sede": [
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 07",
+        "tipo_agenda": "PRESENCIAL",
+        "n": 50665
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE 07",
+        "tipo_agenda": "TELEMEDICINA",
+        "n": 19
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS - SEDE CAJICA",
+        "tipo_agenda": "PRESENCIAL",
+        "n": 30886
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS CL 14",
+        "tipo_agenda": "PRESENCIAL",
+        "n": 47328
+      },
+      {
+        "nombre_sede": "NORDVITAL IPS CL 14",
+        "tipo_agenda": "TELESALUD",
+        "n": 72
+      }
+    ]
+  },
+  "pym_rias": {
+    "_warning": "Grupo etario y poblaciÃ³n denominador pendientes Fase A",
+    "top_programas": [
+      {
+        "pym": "MEDICINA GENERAL",
+        "n": 107743,
+        "pct_cump": 48.7
+      },
+      {
+        "pym": "ODONTOLOGÍA GENERAL",
+        "n": 32257,
+        "pct_cump": 43.1
+      },
+      {
+        "pym": "PSICOLOGÍA",
+        "n": 11509,
+        "pct_cump": 32.9
+      },
+      {
+        "pym": "ENFERMERÍA",
+        "n": 11407,
+        "pct_cump": 55.3
+      },
+      {
+        "pym": "MEDICINA INTERNA",
+        "n": 7802,
+        "pct_cump": 36.7
+      },
+      {
+        "pym": "PEDIATRÍA",
+        "n": 7370,
+        "pct_cump": 24.8
+      },
+      {
+        "pym": "NUTRICIÓN Y DIETÉTICA",
+        "n": 6605,
+        "pct_cump": 37.2
+      },
+      {
+        "pym": "MEDICINA FAMILIAR",
+        "n": 4152,
+        "pct_cump": 11.2
+      },
+      {
+        "pym": "GINECOLOGÍA Y OBSTETRICIA",
+        "n": 4047,
+        "pct_cump": 36.0
+      },
+      {
+        "pym": "OPTOMETRÍA",
+        "n": 3797,
+        "pct_cump": 49.7
+      }
+    ],
+    "deteccion_temprana": [],
+    "alertas_cohortes": [
+      {
+        "cohorte": "FONOAUDIOLOGÍA",
+        "poblacion": 300,
+        "pct_cump": 0.0
+      },
+      {
+        "cohorte": "FISIOTERAPIA",
+        "poblacion": 1980,
+        "pct_cump": 0.0
+      },
+      {
+        "cohorte": "TERAPIA OCUPACIONAL",
+        "poblacion": 215,
+        "pct_cump": 0.0
+      },
+      {
+        "cohorte": "UROLOGÍA",
+        "poblacion": 574,
+        "pct_cump": 0.2
+      },
+      {
+        "cohorte": "MEDICINA FAMILIAR",
+        "poblacion": 4152,
+        "pct_cump": 11.2
+      },
+      {
+        "cohorte": "DERMATOLOGÍA",
+        "poblacion": 1959,
+        "pct_cump": 18.6
+      },
+      {
+        "cohorte": "CITA MORBILIDAD",
+        "poblacion": 1517,
+        "pct_cump": 22.5
+      },
+      {
+        "cohorte": "PEDIATRÍA",
+        "poblacion": 7370,
+        "pct_cump": 24.8
+      }
+    ]
+  }
+}

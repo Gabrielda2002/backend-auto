@@ -1,0 +1,361 @@
+<!--
+  Dashboard 01 — Resumen Gerencial (Modo Claro Final)
+  Origen: docs/codigo_base_ds (líneas 1803-2301)
+  Zonas anotadas: [HEAD] [SIDEBAR] [TOPBAR] [FILTERS] [KPIS] [CHARTS] [FOOTER]
+-->
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<!-- ==================== [HEAD] ==================== -->
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NORDVITAL IPS — Resumen Gerencial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#eceef0",
+                    "surface-bright": "#f7f9fb",
+                    "surface-tint": "#3a6186",
+                    "normative-green": "#2E7D32",
+                    "surface-container-low": "#f2f4f6",
+                    "secondary": "#006a6a",
+                    "on-tertiary-container": "#64b461",
+                    "tertiary": "#002a05",
+                    "tertiary-container": "#00430d",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "on-surface-variant": "#42474e",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#a3caf4",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "on-tertiary-fixed-variant": "#005312",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#a3caf4",
+                    "inverse-on-surface": "#eff1f3",
+                    "primary": "#00253f",
+                    "on-surface": "#191c1e",
+                    "surface-dim": "#d8dadc",
+                    "on-secondary-container": "#007070",
+                    "normative-red": "#D32F2F",
+                    "error": "#ba1a1a",
+                    "on-tertiary": "#ffffff",
+                    "corporate-navy": "#0B3B5E",
+                    "surface": "#f7f9fb",
+                    "corporate-turquoise": "#1F8E8E",
+                    "secondary-fixed": "#92f3f2",
+                    "on-primary-fixed": "#001d34",
+                    "surface-container-highest": "#e0e3e5",
+                    "outline": "#72777f",
+                    "tertiary-fixed": "#a3f69c",
+                    "on-secondary-fixed": "#002020",
+                    "outline-variant": "#C2C7CF",
+                    "background": "#f7f9fb",
+                    "on-primary-container": "#7fa6ce",
+                    "on-secondary-fixed-variant": "#004f50",
+                    "on-primary-fixed-variant": "#1f496d",
+                    "primary-container": "#0b3b5e",
+                    "surface-container-high": "#e6e8ea",
+                    "secondary-container": "#92f3f2",
+                    "secondary-fixed-dim": "#75d6d6",
+                    "tertiary-fixed-dim": "#88d982",
+                    "primary-fixed": "#cfe5ff",
+                    "normative-amber": "#FBC02D",
+                    "on-tertiary-fixed": "#002204",
+                    "on-background": "#191c1e"
+            },
+            "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+            "spacing": { "xl": "64px", "md": "24px", "sm": "12px", "xs": "4px", "base": "8px", "lg": "40px", "gutter": "24px", "margin": "32px" },
+            "fontFamily": { "headline-lg-mobile": ["Inter"], "title-lg": ["Inter"], "display-lg": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"] },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "title-lg": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .card-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .card-shadow-hover:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+        .gauge-svg { transform: rotate(-90deg); transform-origin: 50% 50%; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- ==================== [SIDEBAR] ==================== -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-white border-r border-outline-variant flex flex-col py-6 space-y-2 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-headline-sm text-headline-sm font-black text-corporate-navy">NORDVITAL IPS</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Executive BI Suite</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 bg-primary-container text-white rounded-lg px-4 py-3 mx-2 scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Resumen Gerencial</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-md text-label-md">Ejecución vs Nota Técnica</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-md text-label-md">Análisis Financiero</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">high_quality</span>
+<span class="font-label-md text-label-md">Calidad y Oportunidad</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">health_and_safety</span>
+<span class="font-label-md text-label-md">PyM / RIAS</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-4">
+<button class="w-full bg-corporate-navy text-white font-label-md text-label-md py-3 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">download</span>
+                Exportar Reporte
+            </button>
+<div class="pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:text-corporate-navy transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Configuración</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:text-corporate-navy transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Ayuda</span>
+</a>
+</div>
+</div>
+</aside>
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- ==================== [TOPBAR] ==================== -->
+<header class="sticky top-0 bg-background/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center w-full px-gutter h-16 z-40">
+<div class="flex items-center gap-4">
+<span class="font-title-lg text-title-lg text-corporate-navy">Resumen Gerencial</span>
+<span class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Ene - May 2026 · 344.438 citas</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</header>
+<div class="p-gutter space-y-gutter flex-1">
+<!-- ==================== [FILTERS] ==================== -->
+<section class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Sede Principal</span>
+<select class="bg-transparent border-none p-0 font-title-lg text-[14px] text-corporate-navy focus:ring-0 cursor-pointer">
+<option>Todas las Sedes</option><option>NORDVITAL IPS - SEDE 07</option><option>NORDVITAL IPS - SEDE CAJICA</option><option>NORDVITAL IPS - SEDE CHIA</option><option>NORDVITAL IPS CL 14</option>
+</select>
+</div>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Periodo</span>
+<select class="bg-transparent border-none p-0 font-title-lg text-[14px] text-corporate-navy focus:ring-0 cursor-pointer">
+<option>Ene - May 2026</option><option>Últimos 30 días</option>
+</select>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-white text-on-surface-variant px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 border border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>Filtros Avanzados
+</button>
+<button class="bg-corporate-turquoise text-white px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity shadow-sm">
+<span class="material-symbols-outlined text-[18px]">refresh</span>Actualizar Datos
+</button>
+</div>
+</section>
+<!-- ==================== [KPIS] 5 tarjetas ==================== -->
+<section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+<!-- KPI 1: Cumplimiento Global -->
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-corporate-turquoise transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Cumplimiento Global</span>
+<span class="bg-normative-green/10 text-normative-green text-[10px] font-bold px-2 py-1 rounded-full">+2.1%</span>
+</div>
+<div class="flex items-baseline gap-2"><h3 class="font-headline-lg text-headline-lg text-corporate-navy">43.4%</h3></div>
+<div class="w-full bg-surface-container h-1.5 rounded-full mt-4 overflow-hidden"><div class="bg-corporate-turquoise h-full rounded-full" style="width: 43.4%"></div></div>
+</div>
+<!-- KPI 2: Recuperación total (Desviación pendiente NT) -->
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-secondary transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Recuperación Total</span>
+<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded-full">REAL</span>
+</div>
+<div class="flex items-baseline gap-2"><h3 class="font-headline-lg text-headline-lg text-corporate-navy">$85.2M</h3></div>
+<p class="text-[10px] text-on-surface-variant mt-4">Desviación vs NT — pendiente Fase A</p>
+</div>
+<!-- KPI 3: Convenios en Riesgo -->
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-normative-amber transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Convenios en Riesgo</span>
+<span class="bg-normative-amber/10 text-normative-amber text-[10px] font-bold px-2 py-1 rounded-full">ALERTA</span>
+</div>
+<div class="flex items-baseline gap-2"><h3 class="font-headline-lg text-headline-lg text-normative-amber">23</h3></div>
+<p class="text-[10px] text-on-surface-variant mt-4">Convenios con cumplimiento &lt; 70%</p>
+</div>
+<!-- KPI 4: Oportunidad Promedio -->
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-corporate-navy transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Oportunidad Prom.</span>
+<span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded-full">ESTABLE</span>
+</div>
+<div class="flex items-baseline gap-2"><h3 class="font-headline-lg text-headline-lg text-corporate-navy">3.4 d</h3></div>
+<p class="text-[10px] text-on-surface-variant mt-4">Días promedio fecha_deseada → fecha_cita</p>
+</div>
+<!-- KPI 5: Total Citas Atendidas (Ratio Ej./Meta pendiente NT) -->
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-normative-green transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Citas Cumplidas</span>
+<span class="material-symbols-outlined text-normative-green">analytics</span>
+</div>
+<div class="flex items-baseline gap-2"><h3 class="font-headline-lg text-headline-lg text-corporate-navy">113.3k</h3></div>
+<p class="text-[10px] text-on-surface-variant mt-4">De 260.974 con estado registrado</p>
+</div>
+</section>
+<!-- ==================== [CHARTS] Bento grid ==================== -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Chart A: Evolución Ejecución vs Meta (Bar) -->
+<div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-xl card-shadow border border-outline-variant">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="font-title-lg text-title-lg text-corporate-navy">Evolución Mensual de Citas vs Cumplidas</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Total de citas y cumplidas por mes (Ene–May 2026)</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-corporate-navy"></span><span class="text-[12px] font-bold text-on-surface-variant">Total Citas</span></div>
+<div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-corporate-turquoise"></span><span class="text-[12px] font-bold text-on-surface-variant">Cumplidas</span></div>
+</div>
+</div>
+<div class="h-64 flex items-end justify-between gap-4 px-2 relative">
+<!-- Enero: 69218 total / 18456 cump -->
+<div class="flex-1 flex flex-col justify-end h-full gap-2 text-center group">
+<div class="flex items-end justify-center gap-2 h-full px-2">
+<div class="relative w-10 bg-corporate-navy rounded-t-lg transition-all hover:opacity-80" style="height: 91%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">69.2k</span></div>
+<div class="relative w-10 bg-corporate-turquoise rounded-t-lg transition-all hover:opacity-80" style="height: 24%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-corporate-turquoise">18.5k</span></div>
+</div>
+<span class="text-[10px] font-medium text-on-surface-variant">Ene</span>
+</div>
+<!-- Febrero: 75979 total / 22201 cump -->
+<div class="flex-1 flex flex-col justify-end h-full gap-2 text-center group">
+<div class="flex items-end justify-center gap-2 h-full px-2">
+<div class="relative w-10 bg-corporate-navy rounded-t-lg transition-all hover:opacity-80" style="height: 100%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">76.0k</span></div>
+<div class="relative w-10 bg-corporate-turquoise rounded-t-lg transition-all hover:opacity-80" style="height: 29%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-corporate-turquoise">22.2k</span></div>
+</div>
+<span class="text-[10px] font-medium text-on-surface-variant">Feb</span>
+</div>
+<!-- Marzo: 74978 total / 21149 cump -->
+<div class="flex-1 flex flex-col justify-end h-full gap-2 text-center group">
+<div class="flex items-end justify-center gap-2 h-full px-2">
+<div class="relative w-10 bg-corporate-navy rounded-t-lg transition-all hover:opacity-80" style="height: 99%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">75.0k</span></div>
+<div class="relative w-10 bg-corporate-turquoise rounded-t-lg transition-all hover:opacity-80" style="height: 28%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-corporate-turquoise">21.1k</span></div>
+</div>
+<span class="text-[10px] font-medium text-on-surface-variant">Mar</span>
+</div>
+<!-- Abril: 69349 total / 33363 cump -->
+<div class="flex-1 flex flex-col justify-end h-full gap-2 text-center group">
+<div class="flex items-end justify-center gap-2 h-full px-2">
+<div class="relative w-10 bg-corporate-navy rounded-t-lg transition-all hover:opacity-80" style="height: 91%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">69.3k</span></div>
+<div class="relative w-10 bg-corporate-turquoise rounded-t-lg transition-all hover:opacity-80" style="height: 44%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-corporate-turquoise">33.4k</span></div>
+</div>
+<span class="text-[10px] font-medium text-on-surface-variant">Abr</span>
+</div>
+<!-- Mayo: 54914 total / 18161 cump -->
+<div class="flex-1 flex flex-col justify-end h-full gap-2 text-center group">
+<div class="flex items-end justify-center gap-2 h-full px-2">
+<div class="relative w-10 bg-corporate-navy rounded-t-lg transition-all hover:opacity-80" style="height: 72%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">54.9k</span></div>
+<div class="relative w-10 bg-corporate-turquoise rounded-t-lg transition-all hover:opacity-80" style="height: 24%;"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-corporate-turquoise">18.2k</span></div>
+</div>
+<span class="text-[10px] font-medium text-on-surface-variant">May</span>
+</div>
+</div>
+</div>
+<!-- Chart B: Distribución de Servicios (Donut) -->
+<div class="col-span-12 lg:col-span-4 bg-white p-6 rounded-xl card-shadow border border-outline-variant flex flex-col">
+<h4 class="font-title-lg text-title-lg text-corporate-navy mb-1">Distribución de Servicios</h4>
+<p class="font-label-md text-label-md text-on-surface-variant mb-8">Por funcionalidad (CONSULTA vs PROCEDIMIENTO)</p>
+<div class="flex-1 flex flex-col items-center justify-center relative">
+<div class="relative w-44 h-44 mb-6">
+<svg class="w-full h-full gauge-svg" viewbox="0 0 100 100">
+<circle class="text-surface-container" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="10"></circle>
+<!-- CONSULTA 65.5% -->
+<circle class="text-corporate-turquoise" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="86.66" stroke-linecap="butt" stroke-width="10"></circle>
+<!-- PROCEDIMIENTO 34.5% -->
+<circle class="text-normative-green" cx="50" cy="50" fill="transparent" r="30" stroke="currentColor" stroke-dasharray="188.5" stroke-dashoffset="123.4" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="block font-headline-md text-headline-md text-corporate-navy">344k</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">Total</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 w-full">
+<div class="flex items-center gap-2"><div class="w-3.5 h-3.5 rounded bg-corporate-turquoise"></div><div class="flex flex-col"><span class="text-[11px] font-bold text-on-surface">Consulta</span><span class="text-[10px] text-on-surface-variant">65.5% · 225.7k</span></div></div>
+<div class="flex items-center gap-2"><div class="w-3.5 h-3.5 rounded bg-normative-green"></div><div class="flex flex-col"><span class="text-[11px] font-bold text-on-surface">Procedimiento</span><span class="text-[10px] text-on-surface-variant">34.5% · 118.7k</span></div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Chart C: Cumplimiento por Convenio (Bar) -->
+<div class="col-span-12 lg:col-span-6 bg-white p-6 rounded-xl card-shadow border border-outline-variant">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-title-lg text-title-lg text-corporate-navy">Cumplimiento por Convenio</h4>
+<span class="text-on-surface-variant font-label-md text-label-md">Top 5</span>
+</div>
+<div class="space-y-4">
+<div class="space-y-1"><div class="flex justify-between text-[12px] font-bold text-on-surface"><span>COOSALUD CAPITA CONTRIBUTIVO</span><span class="text-corporate-turquoise">68.3%</span></div><div class="w-full bg-surface-container h-2 rounded-full overflow-hidden"><div class="bg-corporate-turquoise h-full rounded-full" style="width: 68.3%"></div></div></div>
+<div class="space-y-1"><div class="flex justify-between text-[12px] font-bold text-on-surface"><span>FAMISANAR CHIA CAPITA CONTRIB.</span><span class="text-corporate-turquoise">67.3%</span></div><div class="w-full bg-surface-container h-2 rounded-full overflow-hidden"><div class="bg-corporate-turquoise h-full rounded-full" style="width: 67.3%"></div></div></div>
+<div class="space-y-1"><div class="flex justify-between text-[12px] font-bold text-on-surface"><span>NUEVA EPS PGP CONTRIBUTIVO</span><span class="text-normative-amber">40.0%</span></div><div class="w-full bg-surface-container h-2 rounded-full overflow-hidden"><div class="bg-normative-amber h-full rounded-full" style="width: 40%"></div></div></div>
+<div class="space-y-1"><div class="flex justify-between text-[12px] font-bold text-on-surface"><span>COMPENSAR CAJICA PGP CONTRIB.</span><span class="text-normative-red">22.2%</span></div><div class="w-full bg-surface-container h-2 rounded-full overflow-hidden"><div class="bg-normative-red h-full rounded-full" style="width: 22.2%"></div></div></div>
+<div class="space-y-1"><div class="flex justify-between text-[12px] font-bold text-on-surface"><span>NORDVITAL IPS SAS (PANA)</span><span class="text-on-surface-variant">s/d</span></div><div class="w-full bg-surface-container h-2 rounded-full overflow-hidden"><div class="bg-outline-variant h-full rounded-full" style="width: 3%"></div></div></div>
+</div>
+</div>
+<!-- Chart D: Costo por Sede (Treemap) -->
+<div class="col-span-12 lg:col-span-6 bg-white p-6 rounded-xl card-shadow border border-outline-variant">
+<h4 class="font-title-lg text-title-lg text-corporate-navy mb-1">Volumen por Sede</h4>
+<p class="font-label-md text-label-md text-on-surface-variant mb-6">Citas registradas Ene–May 2026 (costos $ pendientes Fase A)</p>
+<div class="grid grid-cols-6 grid-rows-2 h-48 gap-2">
+<div class="col-span-3 row-span-2 bg-corporate-navy rounded-lg p-3 text-white flex flex-col justify-end hover:brightness-110 transition-all cursor-pointer"><span class="font-bold text-[14px]">Sede 07</span><span class="text-[11px] opacity-80">63.972 citas (37%)</span></div>
+<div class="col-span-3 row-span-1 bg-corporate-turquoise rounded-lg p-3 text-white flex flex-col justify-end hover:brightness-110 transition-all cursor-pointer"><span class="font-bold text-[14px]">CL 14</span><span class="text-[11px] opacity-80">50.355 citas (29%)</span></div>
+<div class="col-span-2 row-span-1 bg-secondary-fixed rounded-lg p-3 text-on-secondary-fixed-variant flex flex-col justify-end hover:brightness-110 transition-all cursor-pointer"><span class="font-bold text-[12px]">Cajíca</span><span class="text-[10px] opacity-80">28%</span></div>
+<div class="col-span-1 row-span-1 bg-surface-container-highest rounded-lg p-3 text-on-surface flex items-center justify-center hover:brightness-110 transition-all cursor-pointer"><span class="font-bold text-[10px]">Otras</span></div>
+</div>
+</div>
+</section>
+</div>
+<!-- ==================== [FOOTER] ==================== -->
+<footer class="bg-surface-container-low border-t border-outline-variant flex justify-between items-center w-full px-gutter py-4 mt-auto">
+<p class="font-label-md text-label-md text-on-surface-variant">Fuente: BD citas_db — NORDVITAL IPS. Comparativo Ejecución vs Nota Técnica vigente.</p>
+<div class="flex gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-corporate-navy transition-colors" href="#">Privacidad</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-corporate-navy transition-colors" href="#">Términos de Uso</a>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px]">verified</span><span class="font-label-md text-label-md">Sistema Auditado</span></div>
+</div>
+</footer>
+</main>
+<script>
+        document.querySelectorAll('a, button, select').forEach(el => {
+            el.addEventListener('mousedown', () => el.classList.add('opacity-80'));
+            el.addEventListener('mouseup', () => el.classList.remove('opacity-80'));
+            el.addEventListener('mouseleave', () => el.classList.remove('opacity-80'));
+        });
+    </script>
+</body></html>

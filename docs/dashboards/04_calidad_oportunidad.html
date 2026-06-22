@@ -1,0 +1,291 @@
+<!--
+  Dashboard 04 — Calidad y Oportunidad (Chrome Unificado Claro)
+  Origen: docs/codigo_base_ds (líneas 468-976)
+  Zonas anotadas: [HEAD] [SIDEBAR] [TOPBAR] [FILTERS] [GAUGES] [STACKED_BARS] [LINE_CHART] [MIX_AGENDA] [FOOTER]
+-->
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<!-- ==================== [HEAD] ==================== -->
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NORDVITAL IPS — Calidad y Oportunidad</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container": "#eceef0", "surface-bright": "#f7f9fb", "surface-tint": "#3a6186",
+                "normative-green": "#2E7D32", "surface-container-low": "#f2f4f6", "secondary": "#006a6a",
+                "on-tertiary-container": "#64b461", "tertiary": "#002a05", "tertiary-container": "#00430d",
+                "on-primary": "#ffffff", "surface-variant": "#e0e3e5", "on-surface-variant": "#42474e",
+                "error-container": "#ffdad6", "on-error": "#ffffff", "inverse-primary": "#a3caf4",
+                "surface-container-lowest": "#ffffff", "inverse-surface": "#2d3133",
+                "on-tertiary-fixed-variant": "#005312", "on-secondary": "#ffffff", "on-error-container": "#93000a",
+                "primary-fixed-dim": "#a3caf4", "inverse-on-surface": "#eff1f3", "primary": "#00253f",
+                "on-surface": "#191c1e", "surface-dim": "#d8dadc", "on-secondary-container": "#007070",
+                "normative-red": "#D32F2F", "error": "#ba1a1a", "on-tertiary": "#ffffff",
+                "corporate-navy": "#0B3B5E", "surface": "#f7f9fb", "corporate-turquoise": "#1F8E8E",
+                "secondary-fixed": "#92f3f2", "on-primary-fixed": "#001d34", "surface-container-highest": "#e0e3e5",
+                "outline": "#72777f", "tertiary-fixed": "#a3f69c", "on-secondary-fixed": "#002020",
+                "outline-variant": "#C2C7CF", "background": "#f7f9fb", "on-primary-container": "#7fa6ce",
+                "on-secondary-fixed-variant": "#004f50", "on-primary-fixed-variant": "#1f496d",
+                "primary-container": "#0b3b5e", "surface-container-high": "#e6e8ea", "secondary-container": "#92f3f2",
+                "secondary-fixed-dim": "#75d6d6", "tertiary-fixed-dim": "#88d982", "primary-fixed": "#cfe5ff",
+                "normative-amber": "#FBC02D", "on-tertiary-fixed": "#002204", "on-background": "#191c1e"
+        },
+        "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+        "spacing": { "xl": "64px", "md": "24px", "sm": "12px", "xs": "4px", "base": "8px", "lg": "40px", "gutter": "24px", "margin": "32px" },
+        "fontFamily": { "headline-lg-mobile": ["Inter"], "title-lg": ["Inter"], "display-lg": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"], "headline-lg": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"] },
+        "fontSize": {
+                "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                "title-lg": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                "label-md": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+        }
+    },
+    },
+  }
+</script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; color: #191c1e; }
+        .gauge-svg { transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .shadow-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .shadow-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f7f9fb; }
+        ::-webkit-scrollbar-thumb { background: #e0e3e5; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #c2c7cf; }
+</style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- ==================== [SIDEBAR] ==================== -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-white border-r border-outline-variant flex flex-col py-6 space-y-2 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-headline-sm text-headline-sm font-black text-corporate-navy">NORDVITAL IPS</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Executive BI Suite</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Resumen Gerencial</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">monitoring</span><span class="font-label-md text-label-md">Ejecución vs Nota Técnica</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">payments</span><span class="font-label-md text-label-md">Análisis Financiero</span></a>
+<a class="flex items-center gap-3 bg-primary-container text-white rounded-lg px-4 py-3 mx-2 scale-95 transition-transform" href="#"><span class="material-symbols-outlined">high_quality</span><span class="font-label-md text-label-md">Calidad y Oportunidad</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">health_and_safety</span><span class="font-label-md text-label-md">PyM / RIAS</span></a>
+</nav>
+<div class="px-4 mt-auto space-y-4">
+<button class="w-full bg-corporate-navy text-white font-label-md text-label-md py-3 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"><span class="material-symbols-outlined">download</span>Exportar Reporte</button>
+<div class="pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:text-corporate-navy transition-colors" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Configuración</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:text-corporate-navy transition-colors" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Ayuda</span></a>
+</div>
+</div>
+</aside>
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- ==================== [TOPBAR] ==================== -->
+<header class="sticky top-0 bg-background/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center w-full px-gutter h-16 z-40">
+<div class="flex items-center gap-4">
+<span class="font-title-lg text-title-lg text-corporate-navy">Calidad y Oportunidad</span>
+<span class="bg-surface-container-highest px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Ene–May 2026 · Datos reales</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</header>
+<div class="p-gutter space-y-gutter flex-grow">
+<!-- ==================== [FILTERS] ==================== -->
+<section class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Sede Principal</span>
+<select class="bg-transparent border-none p-0 font-title-lg text-[14px] text-corporate-navy focus:ring-0 cursor-pointer"><option>Todas las Sedes</option><option>NORDVITAL IPS - SEDE 07</option><option>NORDVITAL IPS - SEDE CAJICA</option><option>NORDVITAL IPS - SEDE CHIA</option><option>NORDVITAL IPS CL 14</option></select>
+</div>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Periodo</span>
+<select class="bg-transparent border-none p-0 font-title-lg text-[14px] text-corporate-navy focus:ring-0 cursor-pointer"><option>Ene – May 2026</option><option>Últimos 30 días</option></select>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-white text-on-surface-variant px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 border border-outline-variant hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">filter_list</span>Filtros Avanzados</button>
+<button class="bg-corporate-turquoise text-white px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity shadow-sm"><span class="material-symbols-outlined text-[18px]">refresh</span>Actualizar Datos</button>
+</div>
+</section>
+<!-- ==================== [GAUGES] Oportunidad promedio por especialidad ==================== -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20 flex flex-col items-center text-center">
+<div class="flex justify-between w-full mb-4"><span class="font-label-md text-label-md text-on-surface-variant font-bold">Medicina General</span><span class="material-symbols-outlined text-secondary opacity-50">more_vert</span></div>
+<div class="relative w-36 h-36 mb-6">
+<svg class="w-full h-full gauge-svg" viewbox="0 0 100 100">
+<circle class="text-surface-variant/50" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-secondary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="185" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center"><span class="font-display-lg text-headline-lg text-on-surface">1.9</span><span class="text-[10px] uppercase font-black text-on-surface-variant tracking-tighter">Días</span></div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-sm">groups</span><span class="font-label-md text-label-md">111.358 citas</span></div>
+</div>
+<div class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20 flex flex-col items-center text-center">
+<div class="flex justify-between w-full mb-4"><span class="font-label-md text-label-md text-on-surface-variant font-bold">Odontología General</span><span class="material-symbols-outlined text-normative-green opacity-50">more_vert</span></div>
+<div class="relative w-36 h-36 mb-6">
+<svg class="w-full h-full gauge-svg" viewbox="0 0 100 100">
+<circle class="text-surface-variant/50" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-normative-green" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="251" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center"><span class="font-display-lg text-headline-lg text-on-surface">0.0</span><span class="text-[10px] uppercase font-black text-on-surface-variant tracking-tighter">Días</span></div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-sm">groups</span><span class="font-label-md text-label-md">30.422 citas</span></div>
+</div>
+<div class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20 flex flex-col items-center text-center">
+<div class="flex justify-between w-full mb-4"><span class="font-label-md text-label-md text-on-surface-variant font-bold">Auxiliar Enfermería</span><span class="material-symbols-outlined text-normative-green opacity-50">more_vert</span></div>
+<div class="relative w-36 h-36 mb-6">
+<svg class="w-full h-full gauge-svg" viewbox="0 0 100 100">
+<circle class="text-surface-variant/50" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-normative-green" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="251" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center"><span class="font-display-lg text-headline-lg text-on-surface">0.0</span><span class="text-[10px] uppercase font-black text-on-surface-variant tracking-tighter">Días</span></div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-sm">groups</span><span class="font-label-md text-label-md">19.722 citas</span></div>
+</div>
+<div class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20 flex flex-col items-center text-center">
+<div class="flex justify-between w-full mb-4"><span class="font-label-md text-label-md text-on-surface-variant font-bold">Fisioterapia</span><span class="material-symbols-outlined text-primary opacity-50">more_vert</span></div>
+<div class="relative w-36 h-36 mb-6">
+<svg class="w-full h-full gauge-svg" viewbox="0 0 100 100">
+<circle class="text-surface-variant/50" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-normative-green" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="246" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center"><span class="font-display-lg text-headline-lg text-on-surface">0.4</span><span class="text-[10px] uppercase font-black text-on-surface-variant tracking-tighter">Días</span></div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-sm">groups</span><span class="font-label-md text-label-md">13.245 citas</span></div>
+</div>
+</section>
+<!-- ==================== [STACKED_BARS] + [LINE_CHART] ==================== -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Estado de consultas por sede -->
+<div class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-title-lg text-title-lg text-primary">Estado de Consultas por Sede</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-2"><span class="w-3 h-3 bg-secondary rounded-full"></span><span class="font-label-md text-label-md">Cumplida</span></div>
+<div class="flex items-center gap-2"><span class="w-3 h-3 bg-secondary-container rounded-full border border-secondary/30"></span><span class="font-label-md text-label-md">Incumplida</span></div>
+<div class="flex items-center gap-2"><span class="w-3 h-3 bg-error-container rounded-full border border-error/30"></span><span class="font-label-md text-label-md">Cancelada</span></div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between font-label-md text-label-md text-on-surface-variant"><span class="font-bold">NORDVITAL IPS - SEDE 07</span><span class="">63.972 Total · 66.3% cump</span></div>
+<div class="w-full h-4 flex rounded-full overflow-hidden bg-surface-container-highest">
+<div class="bg-secondary h-full transition-all hover:brightness-110" style="width: 66.3%"></div>
+<div class="bg-secondary-container h-full transition-all hover:brightness-110" style="width: 19.5%"></div>
+<div class="bg-error-container h-full transition-all hover:brightness-110" style="width: 14.3%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md text-label-md text-on-surface-variant"><span class="font-bold">NORDVITAL IPS - SEDE CAJICA</span><span class="">48.366 Total · 41.5% cump</span></div>
+<div class="w-full h-4 flex rounded-full overflow-hidden bg-surface-container-highest">
+<div class="bg-secondary h-full transition-all hover:brightness-110" style="width: 41.5%"></div>
+<div class="bg-secondary-container h-full transition-all hover:brightness-110" style="width: 17.5%"></div>
+<div class="bg-error-container h-full transition-all hover:brightness-110" style="width: 10%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md text-label-md text-on-surface-variant"><span class="font-bold">NORDVITAL IPS - SEDE CHIA</span><span class="">35.695 Total · 67.4% cump</span></div>
+<div class="w-full h-4 flex rounded-full overflow-hidden bg-surface-container-highest">
+<div class="bg-secondary h-full transition-all hover:brightness-110" style="width: 67.4%"></div>
+<div class="bg-secondary-container h-full transition-all hover:brightness-110" style="width: 13.3%"></div>
+<div class="bg-error-container h-full transition-all hover:brightness-110" style="width: 19.3%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- % Inasistencia mensual -->
+<div class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-title-lg text-title-lg text-primary">% Inasistencia Mensual</h3>
+<span class="material-symbols-outlined text-on-surface-variant/50">legend_toggle</span>
+</div>
+<div class="h-64 flex flex-col relative">
+<div class="flex-grow flex items-end justify-between px-4 border-b border-l border-outline-variant/30 relative">
+<div class="absolute inset-0 flex justify-between px-4 pointer-events-none opacity-5">
+<div class="w-[1px] h-full bg-on-surface"></div><div class="w-[1px] h-full bg-on-surface"></div>
+<div class="w-[1px] h-full bg-on-surface"></div><div class="w-[1px] h-full bg-on-surface"></div>
+<div class="w-[1px] h-full bg-on-surface"></div><div class="w-[1px] h-full bg-on-surface"></div>
+</div>
+<svg class="absolute inset-0 w-full h-full px-4" preserveaspectratio="none" viewbox="0 0 100 100">
+<defs><lineargradient id="lineGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#006a6a" stop-opacity="0.15"></stop><stop offset="100%" stop-color="#006a6a" stop-opacity="0"></stop></lineargradient></defs>
+<path d="M0,70 L20,60 L40,65 L60,40 L80,45 L100,30 L100,100 L0,100 Z" fill="url(#lineGrad)"></path>
+<polyline fill="none" points="0,70 20,60 40,65 60,40 80,45 100,30" stroke="#006a6a" stroke-linecap="round" stroke-width="3"></polyline>
+<polyline fill="none" opacity="0.6" points="0,50 20,45 40,30 60,35 80,20 100,15" stroke="#3a6186" stroke-dasharray="6" stroke-width="2"></polyline>
+</svg>
+</div>
+<div class="flex justify-between pt-4 font-label-md text-label-md text-on-surface-variant opacity-70">
+<span class="">Ene</span><span class="">Mar</span><span class="">May</span><span class="">Jul</span><span class="">Sep</span><span class="">Nov</span>
+</div>
+</div>
+<div class="mt-6 flex justify-center gap-8">
+<div class="flex items-center gap-2"><span class="w-4 h-1 bg-secondary rounded-full"></span><span class="font-label-md text-label-md">NUEVA EPS PGP (top inasistencia)</span></div>
+<div class="flex items-center gap-2"><span class="w-4 h-1 bg-primary border-dashed border-b-2 opacity-60"></span><span class="font-label-md text-label-md">NORDVITAL IPS SAS</span></div>
+</div>
+</div>
+</section>
+<!-- ==================== [MIX_AGENDA] Mix por sede ==================== -->
+<section class="bg-surface-container-lowest p-gutter rounded-2xl shadow-card border border-outline-variant/20">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-title-lg text-title-lg text-primary">Mix de Tipo de Agenda por Sede</h3>
+<button class="flex items-center gap-2 font-label-md text-label-md text-secondary hover:underline transition-all"><span class="material-symbols-outlined text-sm">visibility</span>Desglosar por Especialidad</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+<div class="space-y-6">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest font-black border-b border-outline-variant/30 pb-2">SEDE 07</h4>
+<div class="space-y-4">
+<div class="space-y-2"><div class="flex justify-between font-label-md text-label-md text-on-surface"><span class="">Presencial</span><span class="font-bold">99.97%</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 99.97%"></div></div></div>
+<div class="space-y-2"><div class="flex justify-between font-label-md text-label-md text-on-surface"><span class="">Telemedicina</span><span class="font-bold">0.03%</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden"><div class="bg-secondary h-full rounded-full" style="width: 0.03%"></div></div></div>
+</div>
+<p class="text-[10px] text-on-surface-variant">63.972 citas totales</p>
+</div>
+<div class="space-y-6">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest font-black border-b border-outline-variant/30 pb-2">SEDE CAJICA</h4>
+<div class="space-y-4">
+<div class="space-y-2"><div class="flex justify-between font-label-md text-label-md text-on-surface"><span class="">Presencial</span><span class="font-bold">100%</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 100%"></div></div></div>
+<div class="space-y-2"><div class="flex justify-between font-label-md text-label-md text-on-surface"><span class="">Telemedicina</span><span class="font-bold">0%</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden"><div class="bg-secondary h-full rounded-full" style="width: 0%"></div></div></div>
+</div>
+<p class="text-[10px] text-on-surface-variant">48.366 citas totales</p>
+</div>
+<div class="space-y-6">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest font-black border-b border-outline-variant/30 pb-2">CL 14</h4>
+<div class="space-y-4">
+<div class="space-y-2"><div class="flex justify-between font-label-md text-label-md text-on-surface"><span class="">Presencial</span><span class="font-bold">99.86%</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full" style="width: 99.86%"></div></div></div>
+<div class="space-y-2"><div class="flex justify-between font-label-md text-label-md text-on-surface"><span class="">Telesalud</span><span class="font-bold">0.14%</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden"><div class="bg-normative-green h-full rounded-full" style="width: 0.14%"></div></div></div>
+</div>
+<p class="text-[10px] text-on-surface-variant">50.355 citas totales</p>
+</div>
+</div>
+</section>
+</div>
+<!-- ==================== [FOOTER] ==================== -->
+<footer class="bg-surface-container-low border-t border-outline-variant flex justify-between items-center w-full px-gutter py-4 mt-auto">
+<p class="font-label-md text-label-md text-on-surface-variant">Fuente: BD citas_db — NORDVITAL IPS. Comparativo Ejecución vs Nota Técnica vigente.</p>
+<div class="flex gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-corporate-navy transition-colors" href="#">Privacidad</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-corporate-navy transition-colors" href="#">Términos de Uso</a>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px]">verified</span><span class="font-label-md text-label-md">Sistema Auditado</span></div>
+</div>
+</footer>
+</main>
+<script>
+        document.querySelectorAll('.w-full.h-4.flex').forEach(container => {
+            container.addEventListener('mouseenter', () => { container.style.transform = 'scaleY(1.2)'; container.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; });
+            container.addEventListener('mouseleave', () => { container.style.transform = 'scaleY(1)'; });
+        });
+</script>
+</body></html>

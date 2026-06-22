@@ -1,98 +1,180 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Dashboard NT — Nordvital IPS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Consolidación y análisis de costos de citas médicas vs. Nota Técnica para
+**Nordvital IPS**. Monorepo con un backend **NestJS** (API sobre MariaDB) y un
+frontend **Vite + React** con 5 dashboards interactivos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Arquitectura
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ pnpm install
+```
+┌─────────────────────────────────────────────────────────────┐
+│  citas_db (MariaDB)                                          │
+│   · costos (maestra, ~381k filas)   · notas_tecnicas         │
+│   · cat_* (catálogos)               · nt_map (puente)        │
+│   · raw_* (datos crudos PLENUS/PANA/SAP)                     │
+└───────────────┬─────────────────────────────────────────────┘
+                │ Prisma 7 + @prisma/adapter-mariadb
+                ▼
+        ┌───────────────────────┐        ┌──────────────────────┐
+        │  Backend NestJS (src/) │  /api  │  Frontend Vite (web/)│
+        │  · /dashboards/*       │◀──────▶│  · React + Recharts  │
+        │  · /filtros/*          │        │  · TanStack Query    │
+        │  · caché + throttler   │        │  · motion (animación)│
+        └───────────────────────┘        └──────────────────────┘
 ```
 
-## Compile and run the project
+- **Backend**: NestJS 11, Prisma 7 con `@prisma/adapter-mariadb`. Prefijo global
+  `api`. Puerto `5808` (o `3000` si `PORT` no está definido).
+- **Frontend**: Vite 5 + React 18 + Tailwind 3, TanStack Query/Table, Recharts,
+  Zod y `motion`. Consume la API en `/api`.
+- **ETL**: consolida PLENUS, PANA y SAP en `costos` (ver `scripts/` y la
+  documentación en `docs/`).
 
-```bash
-# development
-$ pnpm run start
+## Flujo de datos end-to-end
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```
+PLENUS ─┐
+PANA  ──┼─► CSV maestros ─► raw_* ─► 04_insert_costos.sql ─► costos ─► API NestJS ─► 5 dashboards
+SAP   ─┘    (append-only)   (MySQL)   (5 BLOQUES)            (+ nt_map)  /dashboards    React
 ```
 
-## Run tests
+El recorrido completo del dato (orígenes → ETL → `costos`/`nt_map` → API →
+dashboards), las reglas de negocio (mapeo de estados, regla NORDVITAL→NUEVA EPS,
+jerarquía de sedes), los cálculos de cada endpoint y los límites conocidos están
+documentados en:
 
-```bash
-# unit tests
-$ pnpm run test
+- **[docs/FLUJO_DATOS.md](docs/FLUJO_DATOS.md)** — narrativa completa del flujo
+  y diccionario de cálculos por dashboard.
+- **[docs/diagramas/flujo_completo_e2e.drawio](docs/diagramas/flujo_completo_e2e.drawio)**
+  — diagrama end-to-end (abrir con [draw.io](https://app.diagrams.net)).
+- El detalle del ETL (carga, BLOQUES, catálogos) vive en el repo
+  `automatizaci-n-costos-vs-nota-tecnica`, `docs/DOCUMENTACION_PROYECTO.md`.
 
-# e2e tests
-$ pnpm run test:e2e
+## Requisitos
 
-# test coverage
-$ pnpm run test:cov
+- Node.js (con **corepack** habilitado para pnpm).
+- MariaDB/MySQL con la base `citas_db`.
+- Python 3 (solo para los scripts de `scripts/`).
+
+## Puesta en marcha
+
+### 1. Habilitar pnpm (una vez)
+
+Este repo usa **pnpm** vía corepack. Si `pnpm` no está en el PATH, en una
+**PowerShell como Administrador**:
+
+```powershell
+corepack enable
+pnpm --version   # debe imprimir 11.x
 ```
 
-## Deployment
+### 2. Variables de entorno
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+```powershell
+Copy-Item .env.example .env   # editar credenciales de MariaDB
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Runtime usa `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`.
+La CLI de Prisma (migraciones) usa `DATABASE_URL`.
 
-## Resources
+### 3. Backend
 
-Check out a few resources that may come in handy when working with NestJS:
+```powershell
+pnpm install
+pnpm approve-builds        # marcar prisma, @prisma/engines, @nestjs/core, unrs-resolver (SPACE + ENTER)
+pnpm run prisma:generate
+pnpm run start:dev         # API en http://localhost:5808/api
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 4. Frontend
 
-## Support
+```powershell
+cd web
+pnpm install
+pnpm approve-builds        # marcar esbuild (SPACE + ENTER)
+pnpm dev                   # UI en http://localhost:5173
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+> **Nota**: en la raíz, `pnpm run <script>` hace un chequeo previo de
+> dependencias que falla mientras haya *build scripts* sin aprobar. El frontend
+> (`web/`) ya lo desactiva con `verifyDepsBeforeRun: false`. Si en la raíz no
+> puedes aprobar los builds, arranca llamando node directo:
+> - Frontend: `node node_modules/vite/bin/vite.js`
+> - Backend: `node node_modules/@nestjs/cli/bin/nest.js start --watch`
 
-## Stay in touch
+## Comandos útiles
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Backend (raíz):
 
-## License
+| Tarea | Comando |
+|------|---------|
+| Dev (watch) | `pnpm run start:dev` |
+| Build | `pnpm run build` |
+| Lint | `pnpm run lint` |
+| Typecheck | `npx tsc --noEmit` |
+| Tests | `pnpm run test` / `pnpm run test:e2e` |
+| Prisma generate | `pnpm run prisma:generate` |
+| Prisma migrate | `pnpm run prisma:migrate` |
+| Seed | `pnpm run prisma:seed` |
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Frontend (`web/`):
+
+| Tarea | Comando |
+|------|---------|
+| Dev | `pnpm dev` |
+| Build | `pnpm build` |
+| Typecheck | `npx tsc --noEmit` |
+| Lint | `pnpm lint` |
+
+## Estructura
+
+```
+src/                      Backend NestJS
+  dashboards/             5 endpoints agregados + toda la lógica de cumplimiento NT
+  filtros/                catálogos para selects (sedes, convenios, modalidades, regímenes…)
+  common/                 filtros, logger (Winston), middleware
+  prisma/                 PrismaModule global + PrismaService (adapter MariaDB)
+prisma/
+  schema.prisma           modelos (Cat*, Raw*, Costos, NotaTecnica, NtMap, CatConvenioAgrupador)
+web/                      Frontend Vite + React (proyecto pnpm independiente)
+  src/pages/              una página por dashboard
+  src/components/{ui,charts,motion,filters,layout}/
+  src/lib/api/            cliente API tipado por dominio (client, filtros, dashboards)
+  src/lib/                queries (TanStack), use-filters (URL), utils
+scripts/                  utilidades Python (ver scripts/README.md)
+docs/                     documentación del proyecto y dashboards estáticos (legacy)
+```
+
+## Dashboards
+
+1. **Resumen Gerencial** — KPIs globales, evolución mensual, cumplimiento por convenio.
+2. **Ejecución vs Nota Técnica** — cumplimiento vs meta NT, heatmap convenio×CUPS, catálogo NT (con buscador por CUPS/descripción) y las secciones *Contratado sin Ejecutar* y *Ejecutado fuera de NT*.
+3. **Análisis Financiero** — costo real vs esperado, recuperación, Pareto de CUPS.
+4. **Calidad y Oportunidad** — oportunidad por especialidad, estados por sede, inasistencia.
+5. **PyM / RIAS** — programas de promoción y mantenimiento.
+
+Los filtros (Periodo, Sede, Convenio, Modalidad, Régimen) son globales,
+single-select y se sincronizan con la URL. Las secciones con muchos datos se
+recorren con un carrusel paginado (no se limitan a un top-N).
+
+> **Cálculos y límites**: el cumplimiento se mide solo sobre convenios con nota
+> técnica. La meta del período es `meta_mes × meses con ejecución` por
+> `(cups, convenio)`; `NUEVA EPS` se trata como un solo convenio (`convNt`); los
+> pares con meta 0 se excluyen; y en cups de consulta (`8902/8903`) solo cuenta la
+> ejecución con `funcionalidad = CONSULTA` (las sesiones de terapia de PANA no
+> inflan el cumplimiento). El Financiero sigue contando todo (incluye
+> procedimientos). El período actual abarca **6 meses (Ene-Jun 2026)**; el heatmap
+> usa un *fallback* de `meses = 5` solo cuando un par no tiene ejecución. Detalle
+> de la lógica en [AGENTS.md](AGENTS.md) y [docs/FLUJO_DATOS.md](docs/FLUJO_DATOS.md).
+
+## Base de datos
+
+- `DATABASE_URL` → solo para migraciones de Prisma.
+- Runtime → `DB_HOST/PORT/USER/PASSWORD/NAME`.
+- Tras cambiar `schema.prisma`: `pnpm run prisma:generate` antes de compilar.
+- Columnas agrupadoras en `costos` (ETL v2.1): `convenio_grupo`, `sede_grupo`,
+  `modalidad`, `regimen_grupo` (desde `cat_convenio_agrupador`).
+
+## Convenciones
+
+Ver [AGENTS.md](AGENTS.md) para el detalle de convenciones, quirks y notas de pnpm.

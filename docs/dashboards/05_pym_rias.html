@@ -1,0 +1,265 @@
+<!--
+  Dashboard 05 — PyM / RIAS (Chrome Unificado Claro)
+  Origen: docs/codigo_base_ds (líneas 1-466)
+  Zonas anotadas: [HEAD] [TOPBAR] [SIDEBAR] [FILTERS] [KPIS] [COBERTURA] [GRUPO_ETARIO] [ALERTAS_TABLE] [FOOTER]
+-->
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<!-- ==================== [HEAD] ==================== -->
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NORDVITAL IPS — PyM / RIAS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        .card-shadow-hover:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e0e3e5; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "normative-red": "#D32F2F", "normative-amber": "#FBC02D", "normative-green": "#2E7D32",
+                        "corporate-navy": "#0B3B5E", "corporate-turquoise": "#1F8E8E",
+                        "on-secondary-container": "#007070", "on-surface-variant": "#42474e", "primary-fixed": "#cfe5ff",
+                        "error": "#ba1a1a", "inverse-primary": "#a3caf4", "on-error-container": "#93000a",
+                        "on-tertiary-container": "#64b461", "on-primary-fixed": "#001d34", "primary-container": "#0b3b5e",
+                        "primary-fixed-dim": "#a3caf4", "on-primary-fixed-variant": "#1f496d", "surface-tint": "#3a6186",
+                        "on-surface": "#191c1e", "surface-container-lowest": "#ffffff", "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed-variant": "#004f50", "inverse-on-surface": "#eff1f3",
+                        "surface-container-low": "#f2f4f6", "inverse-surface": "#2d3133", "secondary": "#006a6a",
+                        "surface-variant": "#e0e3e5", "surface-container": "#eceef0", "secondary-container": "#92f3f2",
+                        "tertiary-fixed-dim": "#88d982", "on-secondary-fixed": "#002020", "error-container": "#ffdad6",
+                        "tertiary-container": "#00430d", "on-tertiary-fixed-variant": "#005312",
+                        "on-primary-container": "#7fa6ce", "surface-dim": "#d8dadc", "primary": "#00253f",
+                        "tertiary-fixed": "#a3f69c", "tertiary": "#002a05", "secondary-fixed-dim": "#75d6d6",
+                        "secondary-fixed": "#92f3f2", "outline": "#72777f", "on-tertiary-fixed": "#002204",
+                        "surface": "#f7f9fb", "on-background": "#191c1e", "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff", "surface-container-highest": "#e0e3e5",
+                        "surface-container-high": "#e6e8ea", "on-error": "#ffffff", "background": "#f7f9fb",
+                        "outline-variant": "#C2C7CF", "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                    "spacing": { "md": "24px", "xs": "4px", "lg": "40px", "sm": "12px", "xl": "64px", "gutter": "24px", "base": "8px", "margin": "32px" },
+                    "fontFamily": { "title-lg": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "body-lg": ["Inter"], "display-lg": ["Inter"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"] },
+                    "fontSize": {
+                        "title-lg": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- ==================== [TOPBAR] ==================== -->
+<header class="sticky top-0 bg-background/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center w-full px-gutter h-16 z-40">
+<div class="flex items-center gap-4">
+<span class="font-title-lg text-title-lg text-corporate-navy">PyM / RIAS</span>
+<span class="bg-normative-amber/20 text-normative-amber px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Ene–May 2026 · grupo_etario pendiente</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</header>
+<div class="flex flex-1 pt-16">
+<!-- ==================== [SIDEBAR] ==================== -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-white border-r border-outline-variant flex flex-col py-6 space-y-2 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-headline-sm text-headline-sm font-black text-corporate-navy">NORDVITAL IPS</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Executive BI Suite</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Resumen Gerencial</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">monitoring</span><span class="font-label-md text-label-md">Ejecución vs Nota Técnica</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">payments</span><span class="font-label-md text-label-md">Análisis Financiero</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#"><span class="material-symbols-outlined">high_quality</span><span class="font-label-md text-label-md">Calidad y Oportunidad</span></a>
+<a class="flex items-center gap-3 bg-primary-container text-white rounded-lg px-4 py-3 mx-2 scale-95 transition-transform" href="#"><span class="material-symbols-outlined">health_and_safety</span><span class="font-label-md text-label-md">PyM / RIAS</span></a>
+</nav>
+<div class="px-4 mt-auto space-y-4">
+<button class="w-full bg-corporate-navy text-white font-label-md text-label-md py-3 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"><span class="material-symbols-outlined">download</span>Exportar Reporte</button>
+<div class="pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:text-corporate-navy transition-colors" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Configuración</span></a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:text-corporate-navy transition-colors" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Ayuda</span></a>
+</div>
+</div>
+</aside>
+<main class="flex-1 md:ml-64 overflow-y-auto bg-background ml-64 p-6">
+<!-- ==================== [FILTERS] ==================== -->
+<section class="flex flex-wrap items-center justify-between gap-4 mb-8">
+<div class="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Sede Principal</span>
+<select class="bg-transparent border-none p-0 font-title-lg text-[14px] text-corporate-navy focus:ring-0 cursor-pointer"><option>Todas las Sedes</option><option>NORDVITAL IPS - SEDE 07</option><option>NORDVITAL IPS - SEDE CAJICA</option><option>NORDVITAL IPS CL 14</option></select>
+</div>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Periodo</span>
+<select class="bg-transparent border-none p-0 font-title-lg text-[14px] text-corporate-navy focus:ring-0 cursor-pointer"><option>Ene – May 2026</option><option>Últimos 30 días</option></select>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-white text-on-surface-variant px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 border border-outline-variant hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">filter_list</span>Filtros Avanzados</button>
+<button class="bg-corporate-turquoise text-white px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-opacity shadow-sm"><span class="material-symbols-outlined text-[18px]">refresh</span>Actualizar Datos</button>
+</div>
+</section>
+<!-- ==================== [KPIS] Top programas (% cumplimiento real) ==================== -->
+<div class="bg-error-container/20 border-l-4 border-normative-amber rounded-lg p-3 flex items-start gap-3 mb-6">
+<span class="material-symbols-outlined text-normative-amber">info</span>
+<div>
+<p class="font-bold text-on-surface text-[13px]">KPIs de detección temprana parcialmente disponibles</p>
+<p class="text-[11px] text-on-surface-variant">Los valores mostrados son <strong>% cumplimiento</strong> sobre los top programas PyM reales. No hay denominador poblacional ni meta NT cargada — las coberturas %, grupos etarios y alertas se completarán al cerrar Fase A.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-normative-amber">
+<div class="flex justify-between items-start mb-4"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Medicina General</span><span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded-full">128.267 citas</span></div>
+<div class="flex items-baseline gap-2"><span class="font-headline-lg text-headline-lg text-on-surface">41.5%</span><span class="font-label-md text-label-md text-on-surface-variant">cumplimiento</span></div>
+<div class="mt-4 w-full bg-surface-container-high h-2 rounded-full overflow-hidden"><div class="bg-normative-amber h-full rounded-full" style="width: 41.5%"></div></div>
+</div>
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-normative-green">
+<div class="flex justify-between items-start mb-4"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Odontología General</span><span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded-full">47.765 citas</span></div>
+<div class="flex items-baseline gap-2"><span class="font-headline-lg text-headline-lg text-on-surface">54.6%</span><span class="font-label-md text-label-md text-on-surface-variant">cumplimiento</span></div>
+<div class="mt-4 w-full bg-surface-container-high h-2 rounded-full overflow-hidden"><div class="bg-normative-green h-full rounded-full" style="width: 54.6%"></div></div>
+</div>
+<div class="bg-white p-6 rounded-xl card-shadow card-shadow-hover border-l-4 border-normative-green">
+<div class="flex justify-between items-start mb-4"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Fisioterapia</span><span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded-full">25.774 citas</span></div>
+<div class="flex items-baseline gap-2"><span class="font-headline-lg text-headline-lg text-on-surface">60.3%</span><span class="font-label-md text-label-md text-on-surface-variant">cumplimiento</span></div>
+<div class="mt-4 w-full bg-surface-container-high h-2 rounded-full overflow-hidden"><div class="bg-normative-green h-full rounded-full" style="width: 60.3%"></div></div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+<!-- ==================== [COBERTURA] Cobertura por programa PyM ==================== -->
+<div class="lg:col-span-7 bg-white p-6 rounded-xl card-shadow flex flex-col h-full border border-outline-variant/20">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-title-lg text-title-lg text-primary">Cumplimiento por Programa (Top 4)</h3>
+<button class="text-secondary font-label-md text-label-md flex items-center gap-1 hover:underline"><span class="material-symbols-outlined text-sm">visibility</span>Ver Detalle</button>
+</div>
+<div class="flex-1 space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2"><span class="font-body-md text-body-md font-semibold text-on-surface">Cita Morbilidad</span><span class="font-body-md text-body-md text-normative-green">71.7% · 16.292 citas</span></div>
+<div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden"><div class="bg-normative-green h-full rounded-full" style="width: 71.7%"></div></div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2"><span class="font-body-md text-body-md font-semibold text-on-surface">Radiología e Imágenes Diagnósticas</span><span class="font-body-md text-body-md text-normative-green">70.1% · 8.408 citas</span></div>
+<div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden"><div class="bg-normative-green h-full rounded-full" style="width: 70.1%"></div></div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2"><span class="font-body-md text-body-md font-semibold text-on-surface">Enfermería</span><span class="font-body-md text-body-md text-normative-amber">59.1% · 12.616 citas</span></div>
+<div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden"><div class="bg-normative-amber h-full rounded-full" style="width: 59.1%"></div></div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2"><span class="font-body-md text-body-md font-semibold text-on-surface">Nutrición y Dietética</span><span class="font-body-md text-body-md text-normative-red">37.2% · 6.612 citas</span></div>
+<div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden"><div class="bg-normative-red h-full rounded-full" style="width: 37.2%"></div></div>
+</div>
+</div>
+</div>
+<!-- ==================== [GRUPO_ETARIO] Ejecución CUPS P&P ==================== -->
+<div class="lg:col-span-5 bg-white p-6 rounded-xl card-shadow flex flex-col h-full border border-outline-variant/20">
+<h3 class="font-title-lg text-title-lg text-primary mb-6">Ejecución CUPS P&amp;P por Grupo Etario</h3>
+<div class="flex-1 flex items-center justify-center text-center px-6">
+<div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-40" style="font-size:64px">cake</span>
+<p class="font-bold text-on-surface mt-2">Pendiente Fase A</p>
+<p class="text-[12px] text-on-surface-variant mt-1">La tabla <code>costos</code> aún no incluye <code>fecha_nacimiento</code> / <code>grupo_etario</code>. Modificar <code>03_carga_diaria_DB.py</code> y <code>04_insert_costos.sql</code> para habilitar este widget.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== [ALERTAS_TABLE] Alertas de cohortes ==================== -->
+<div class="bg-white rounded-xl card-shadow overflow-hidden mb-8 border border-outline-variant/20">
+<div class="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center bg-error-container/10">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-normative-red">warning</span><h3 class="font-title-lg text-title-lg text-primary">Alertas de Cohortes (Cumplimiento &lt; 80%)</h3></div>
+<span class="font-label-md text-label-md bg-normative-red text-white font-bold px-3 py-1 rounded-full">8 Críticas</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-high text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4 font-semibold">Cohorte / Programa</th>
+<th class="px-6 py-4 font-semibold text-right">Población Objeto</th>
+<th class="px-6 py-4 font-semibold text-right">Ejecución Real</th>
+<th class="px-6 py-4 font-semibold">Nivel de Riesgo</th>
+<th class="px-6 py-4 font-semibold text-right">Desviación</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-on-surface">Urología</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-on-surface">574</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red font-bold">0.2%</td>
+<td class="px-6 py-4"><span class="inline-block px-3 py-1 rounded-xl bg-error-container text-normative-red text-[11px] font-bold border border-normative-red/30">CRÍTICO</span></td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red">-79.8%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-on-surface">Medicina Familiar</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-on-surface">4.152</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red font-bold">11.2%</td>
+<td class="px-6 py-4"><span class="inline-block px-3 py-1 rounded-xl bg-error-container text-normative-red text-[11px] font-bold border border-normative-red/30">ALTO</span></td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red">-68.8%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-on-surface">Dermatología</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-on-surface">2.082</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red font-bold">19.4%</td>
+<td class="px-6 py-4"><span class="inline-block px-3 py-1 rounded-xl bg-error-container text-normative-red text-[11px] font-bold border border-normative-red/30">ALTO</span></td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red">-60.6%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-on-surface">Pediatría</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-on-surface">7.370</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red font-bold">24.8%</td>
+<td class="px-6 py-4"><span class="inline-block px-3 py-1 rounded-xl bg-error-container text-normative-red text-[11px] font-bold border border-normative-red/30">ALTO</span></td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-red">-55.2%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-on-surface">Psicología</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-on-surface">11.670</td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-normative-amber font-bold">32.9%</td>
+<td class="px-6 py-4"><span class="inline-block px-3 py-1 rounded-xl bg-normative-amber/10 text-normative-amber text-[11px] font-bold border border-normative-amber/30">MODERADO</span></td>
+<td class="px-6 py-4 text-right font-body-md text-body-md text-on-surface-variant">-47.1%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+<!-- ==================== [FOOTER] ==================== -->
+<footer class="bg-surface-container-low border-t border-outline-variant flex justify-between items-center w-full px-gutter py-4 mt-auto">
+<p class="font-label-md text-label-md text-on-surface-variant">Fuente: BD citas_db — NORDVITAL IPS. Comparativo Ejecución vs Nota Técnica vigente.</p>
+<div class="flex gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-corporate-navy transition-colors" href="#">Privacidad</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-corporate-navy transition-colors" href="#">Términos de Uso</a>
+<div class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px]">verified</span><span class="font-label-md text-label-md">Sistema Auditado</span></div>
+</div>
+</footer>
+<script>
+        document.querySelectorAll('.card-shadow').forEach(card => {
+            card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-2px)'; card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'; });
+            card.addEventListener('mouseleave', () => { card.style.transform = 'translateY(0)'; });
+        });
+        const actionButtons = document.querySelectorAll('button');
+        actionButtons.forEach(btn => {
+            btn.addEventListener('mousedown', () => { btn.style.opacity = '0.7'; });
+            btn.addEventListener('mouseup', () => { btn.style.opacity = '1'; });
+        });
+    </script>
+</body></html>

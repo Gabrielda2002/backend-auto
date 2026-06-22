@@ -3,6 +3,12 @@
 /node_modules
 /build
 
+# Nested workspaces (web/)
+web/node_modules
+web/dist
+web/build
+**/node_modules/
+
 # Logs
 logs
 *.log
@@ -52,6 +58,9 @@ lerna-debug.log*
 # Runtime data
 pids
 *.pid
+
+# Exportes de datos pesados (Excel) — no van en el repo de codigo
+*.xlsx
 *.seed
 *.pid.lock
 
@@ -60,3 +69,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
 sql/
+
+# Playwright MCP artifacts
+.playwright-mcp/

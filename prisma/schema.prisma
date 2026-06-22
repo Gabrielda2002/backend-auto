@@ -58,6 +58,21 @@ model CatConvenio {
   @@map("cat_convenio")
 }
 
+/// Agrupador comercial: mapea cada nombre_convenio (PLENUS/PANA/SAP)
+/// a 4 dimensiones cortas para reporteria (convenio, sede, modalidad,
+/// regimen). Se propaga a costos.convenio_grupo / sede_grupo / modalidad
+/// / regimen_grupo via 04_insert_costos.sql del ETL.
+model CatConvenioAgrupador {
+  id              Int     @id @default(autoincrement()) @db.SmallInt
+  nombreConvenio  String  @unique @db.VarChar(200) @map("nombre_convenio")
+  convenio        String  @db.VarChar(50)
+  sede            String? @db.VarChar(50)
+  modalidad       String? @db.VarChar(50)
+  regimen         String? @db.VarChar(20)
+
+  @@map("cat_convenio_agrupador")
+}
+
 model CatConvenioSap {
   id                    Int     @id @default(autoincrement()) @db.SmallInt
   sedeUo                String  @db.VarChar(100) @map("sede_uo")
@@ -340,22 +355,55 @@ model Costos {
   grupoEspecialidad        String?  @db.VarChar(150) @map("grupo_especialidad")
   nombreMpio               String?  @db.VarChar(100) @map("nombre_mpio")
   entidadAdministradora    String?  @db.VarChar(150) @map("entidad_administradora")
+  fechaCarga               DateTime @default(now()) @db.DateTime @map("fecha_carga")
   convenioGrupo            String?  @db.VarChar(50) @map("convenio_grupo")
   sedeGrupo                String?  @db.VarChar(50) @map("sede_grupo")
   modalidad                String?  @db.VarChar(50)
-  regimenGrupo              String?  @db.VarChar(20) @map("regimen_grupo")
-  fechaCarga               DateTime @default(now()) @db.DateTime @map("fecha_carga")
+  regimenGrupo             String?  @db.VarChar(20) @map("regimen_grupo")
 
+  @@index([fechaCita, nombreSede], map: "ix_costos_fecha_sede")
+  @@index([nombreConvenio, tipoServicio], map: "ix_costos_conv_tiposer")
+  @@index([cups, fechaCita], map: "ix_costos_cups_fecha")
   @@map("costos")
 }
 
-model CatConvenioAgrupador {
-  id                    Int     @id @default(autoincrement()) @db.SmallInt
-  nombreConvenio        String @unique @db.VarChar(200) @map("nombre_convenio")
-  convenio              String? @db.VarChar(20) @map("convenio")
-  sede                  String? @db.VarChar(50) @map("sede")
-  modalidad             String? @db.VarChar(50) @map("modalidad")
-  regimen               String? @db.VarChar(20)
+// ═══════════════════════════════════════════
+//  NOTA TECNICA (METAS DE EJECUCION)
+// ═══════════════════════════════════════════
 
-  @@map("cat_convenio_agrupador")
+model NotaTecnica {
+  id                Int      @id @default(autoincrement())
+  convenio          String?  @db.VarChar(200)
+  cups              String?  @db.VarChar(20)
+  descripcion       String?  @db.VarChar(500)
+  nEventosMes       Int?     @map("n_eventos_mes")
+  eventosAno        Int?     @map("eventos_ano")
+  fu                Decimal? @db.Decimal(18, 8)
+  costoMedioEvento  Decimal? @db.Decimal(18, 2) @map("costo_medio_evento")
+  programa          String?  @db.VarChar(100)
+  fechaDeNt         DateTime? @db.Date @map("fecha_de_nt")
+  centroDeCosto     String?  @db.VarChar(150) @map("centro_de_costo")
+  unidadDeCosto     String?  @db.VarChar(150) @map("unidad_de_costo")
+
+  @@index([convenio])
+  @@index([cups])
+  @@map("notas_tecnicas")
+}
+
+/// Tabla puente NT -> nombre_convenio en costos.
+/// La NT trae convenios con sufijo "/ SUBSIDIADO" o sin sufijo; en costos
+/// cada plan se separa en CONTRIBUTIVO / SUBSIDIADO. nt_map duplica las
+/// filas para permitir JOIN simple e indexable: (cups, nombre_convenio).
+/// Se reconstruye desde notas_tecnicas via DashboardsService.rebuildNtMap()
+/// o desde el script python scripts/extraer_datos_dashboards.py.
+model NtMap {
+  id              Int      @id @default(autoincrement())
+  nombreConvenio  String   @db.VarChar(300) @map("nombre_convenio")
+  cups            String   @db.VarChar(20)
+  metaMes         Int?     @map("meta_mes")
+  costoMedio      Decimal? @db.Decimal(18, 2) @map("costo_medio")
+  programa        String?  @db.VarChar(100)
+
+  @@index([cups, nombreConvenio], map: "ix_cups_conv")
+  @@map("nt_map")
 }

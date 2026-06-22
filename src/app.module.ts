@@ -2,28 +2,22 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
-import { CatSedeModule } from './cat-sede/cat-sede.module';
-import { CatRegimenModule } from './cat-regimen/cat-regimen.module';
-import { CatTipoAgendaModule } from './cat-tipo-agenda/cat-tipo-agenda.module';
-import { CatTipoCitaModule } from './cat-tipo-cita/cat-tipo-cita.module';
-import { CatEstadoCitaModule } from './cat-estado-cita/cat-estado-cita.module';
-import { CatEspecialidadModule } from './cat-especialidad/cat-especialidad.module';
-import { CatCupsModule } from './cat-cups/cat-cups.module';
-import { CatCupsPanaModule } from './cat-cups-pana/cat-cups-pana.module';
-import { CatConvenioModule } from './cat_convenio/cat_convenio.module';
-import { CatConvenioSapModule } from './cat-convenio-sap/cat-convenio-sap.module';
-import { RawPlenusModule } from './raw-plenus/raw-plenus.module';
-import { RawPanaModule } from './raw-pana/raw-pana.module';
-import { RawSapModule } from './raw-sap/raw-sap.module';
-import { CostosModule } from './costos/costos.module';
+import { DashboardsModule } from './dashboards/dashboards.module';
+import { FiltrosModule } from './filtros/filtros.module';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 300_000, // 5 minutos default; cada controller puede sobreescribir con @CacheTTL
+      max: 200,
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -31,20 +25,8 @@ import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware
       },
     ]),
     PrismaModule,
-    CatSedeModule,
-    CatRegimenModule,
-    CatTipoAgendaModule,
-    CatTipoCitaModule,
-    CatEstadoCitaModule,
-    CatEspecialidadModule,
-    CatCupsModule,
-    CatCupsPanaModule,
-    CatConvenioModule,
-    CatConvenioSapModule,
-    RawPlenusModule,
-    RawPanaModule,
-    RawSapModule,
-    CostosModule,
+    DashboardsModule,
+    FiltrosModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

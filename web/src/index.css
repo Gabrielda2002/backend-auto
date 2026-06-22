@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tokens M3 portados desde Stitch (project 8294010403954932792).
+ * Valores HSL aproximados de los hex originales para soportar opacidad con `bg-primary/50`.
+ */
+
+@layer base {
+  :root,
+  .light {
+    /* surfaces */
+    --background: 210 25% 98%;
+    --foreground: 204 8% 11%;
+    --surface: 210 25% 98%;
+    --surface-bright: 210 25% 98%;
+    --surface-dim: 210 4% 86%;
+    --surface-variant: 210 6% 89%;
+    --surface-tint: 210 39% 38%;
+    --surface-container-lowest: 0 0% 100%;
+    --surface-container-low: 210 12% 96%;
+    --surface-container: 210 8% 93%;
+    --surface-container-high: 210 6% 91%;
+    --surface-container-highest: 210 6% 89%;
+    --on-surface: 204 8% 11%;
+    --on-surface-variant: 213 9% 28%;
+    --outline: 215 6% 47%;
+    --outline-variant: 215 13% 79%;
+
+    /* primary */
+    --primary: 209 100% 12%;
+    --on-primary: 0 0% 100%;
+    --primary-container: 207 79% 21%;
+    --on-primary-container: 213 49% 65%;
+    --primary-fixed: 211 100% 91%;
+
+    /* secondary (turquesa) */
+    --secondary: 180 100% 21%;
+    --on-secondary: 0 0% 100%;
+    --secondary-container: 179 81% 76%;
+    --on-secondary-container: 180 100% 22%;
+
+    /* tertiary (verde) */
+    --tertiary: 130 100% 8%;
+    --on-tertiary: 0 0% 100%;
+    --tertiary-container: 130 100% 13%;
+    --on-tertiary-container: 119 36% 55%;
+
+    /* error */
+    --error: 0 75% 42%;
+    --on-error: 0 0% 100%;
+    --error-container: 7 100% 92%;
+    --on-error-container: 4 100% 29%;
+  }
+
+  .dark {
+    --background: 200 25% 9%;
+    --foreground: 210 6% 89%;
+    --surface: 200 25% 9%;
+    --surface-bright: 200 18% 16%;
+    --surface-dim: 200 25% 8%;
+    --surface-variant: 213 9% 28%;
+    --surface-tint: 213 81% 80%;
+    --surface-container-lowest: 204 30% 7%;
+    --surface-container-low: 200 18% 12%;
+    --surface-container: 200 15% 14%;
+    --surface-container-high: 204 13% 18%;
+    --surface-container-highest: 207 11% 22%;
+    --on-surface: 210 6% 89%;
+    --on-surface-variant: 215 13% 79%;
+    --outline: 215 7% 58%;
+    --outline-variant: 213 9% 28%;
+
+    --primary: 213 81% 80%;
+    --on-primary: 207 100% 17%;
+    --primary-container: 208 55% 27%;
+    --on-primary-container: 211 100% 91%;
+    --primary-fixed: 211 100% 91%;
+
+    --secondary: 180 53% 65%;
+    --on-secondary: 180 100% 11%;
+    --secondary-container: 180 100% 16%;
+    --on-secondary-container: 179 81% 76%;
+
+    --tertiary: 117 53% 68%;
+    --on-tertiary: 130 100% 11%;
+    --tertiary-container: 130 100% 16%;
+    --on-tertiary-container: 116 82% 79%;
+
+    --error: 7 100% 84%;
+    --on-error: 4 100% 21%;
+    --error-container: 4 100% 29%;
+    --on-error-container: 7 100% 92%;
+  }
+
+  * {
+    @apply border-outline-variant;
+  }
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .card-shadow {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  .card-shadow-hover {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-shadow-hover:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+  .gauge-svg {
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
+}
