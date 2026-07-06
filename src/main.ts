@@ -12,7 +12,13 @@ async function bootstrap() {
   });
 
   app.use(helmet());
-  app.enableCors({ origin: '*' });
+  const corsOrigin = process.env.CORS_ORIGIN ?? '*';
+  app.enableCors({
+    origin: corsOrigin.includes(',')
+      ? corsOrigin.split(',').map((o) => o.trim())
+      : corsOrigin,
+    credentials: true,
+  });
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalPipes(

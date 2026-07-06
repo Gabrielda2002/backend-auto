@@ -6,6 +6,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { JwtAuthModule } from './common/auth/jwt-auth.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { FiltrosModule } from './filtros/filtros.module';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
@@ -25,6 +26,7 @@ import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware
       },
     ]),
     PrismaModule,
+    JwtAuthModule,
     DashboardsModule,
     FiltrosModule,
   ],

@@ -1,14 +1,23 @@
-import { Controller, Get, Post, Query, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  HttpCode,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
-import { UseInterceptors } from '@nestjs/common';
 import { DashboardsService } from './dashboards.service';
 import { DashboardFiltersDto } from './dto/dashboard-filters.dto';
+import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 
 /**
  * Endpoints agregados para los 5 dashboards.
  * Cache TTL 5 min por endpoint (compartido con TanStack Query en el front).
  */
 @Controller('dashboards')
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(CacheInterceptor)
 @CacheTTL(300_000) // 5 minutos en ms
 export class DashboardsController {

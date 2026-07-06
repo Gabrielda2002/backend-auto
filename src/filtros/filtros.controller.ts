@@ -1,13 +1,21 @@
-import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { FiltrosService } from './filtros.service';
 import { DashboardFiltersDto } from '../dashboards/dto/dashboard-filters.dto';
+import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 
 /**
  * Catalogos dinamicos para selects del frontend.
  * Cache 5 min: los valores cambian solo cuando corre el ETL.
  */
 @Controller('filtros')
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(CacheInterceptor)
 @CacheTTL(300_000)
 export class FiltrosController {
@@ -24,8 +32,14 @@ export class FiltrosController {
   }
 
   @Get('grupos-especialidad')
-  gruposEspecialidad(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getGruposEspecialidad(filters, soloNt === 'true' || soloNt === '1');
+  gruposEspecialidad(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getGruposEspecialidad(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 
   @Get('rango-fechas')
@@ -34,32 +48,68 @@ export class FiltrosController {
   }
 
   @Get('convenios-grupo')
-  conveniosGrupo(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getConveniosGrupo(filters, soloNt === 'true' || soloNt === '1');
+  conveniosGrupo(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getConveniosGrupo(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 
   @Get('convenios-jerarquia')
-  conveniosJerarquia(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getConveniosJerarquia(filters, soloNt === 'true' || soloNt === '1');
+  conveniosJerarquia(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getConveniosJerarquia(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 
   @Get('sedes-grupo')
-  sedesGrupo(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getSedesGrupo(filters, soloNt === 'true' || soloNt === '1');
+  sedesGrupo(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getSedesGrupo(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 
   @Get('sedes-jerarquia')
-  sedesJerarquia(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getSedesJerarquia(filters, soloNt === 'true' || soloNt === '1');
+  sedesJerarquia(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getSedesJerarquia(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 
   @Get('modalidades')
-  modalidades(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getModalidades(filters, soloNt === 'true' || soloNt === '1');
+  modalidades(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getModalidades(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 
   @Get('regimenes')
-  regimenes(@Query() filters: DashboardFiltersDto, @Query('soloNt') soloNt?: string) {
-    return this.service.getRegimenes(filters, soloNt === 'true' || soloNt === '1');
+  regimenes(
+    @Query() filters: DashboardFiltersDto,
+    @Query('soloNt') soloNt?: string,
+  ) {
+    return this.service.getRegimenes(
+      filters,
+      soloNt === 'true' || soloNt === '1',
+    );
   }
 }

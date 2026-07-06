@@ -38,7 +38,10 @@ export class DashboardsService {
    * mucho mas rapido. `extra` permite condiciones extra (p.ej. top_cups).
    * meses = COUNT(ym) ignora fecha NULL (igual que COUNT(DISTINCT fecha)).
    */
-  private ejecAgg(where: Prisma.Sql, extra: Prisma.Sql = Prisma.empty): Prisma.Sql {
+  private ejecAgg(
+    where: Prisma.Sql,
+    extra: Prisma.Sql = Prisma.empty,
+  ): Prisma.Sql {
     return Prisma.sql`(
       SELECT t.nombre_convenio, t.cups, SUM(t.cnt) AS n, COUNT(t.ym) AS meses
       FROM (
@@ -104,28 +107,41 @@ export class DashboardsService {
     const ntConvenios = Prisma.sql`
       AND ${this.convNt('c.nombre_convenio')} IN (SELECT DISTINCT ${this.convNt('nombre_convenio')} FROM nt_map)`;
 
-    const [meta, cumplimiento, recuperacion, conveniosRiesgo, oportunidad, evolucion, distribucion, topConvenios, topSedes] =
-      await Promise.all([
-        this.prisma.$queryRaw<Array<{ total: bigint; desde: Date | null; hasta: Date | null }>>(
-          Prisma.sql`
+    const [
+      meta,
+      cumplimiento,
+      recuperacion,
+      conveniosRiesgo,
+      oportunidad,
+      evolucion,
+      distribucion,
+      topConvenios,
+      topSedes,
+    ] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{ total: bigint; desde: Date | null; hasta: Date | null }>
+      >(
+        Prisma.sql`
             SELECT COUNT(*) AS total, MIN(fecha_cita) AS desde, MAX(fecha_cita) AS hasta
             FROM costos c ${whereSql}
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ pct: number | null; cumplidas: bigint; con_estado: bigint }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<
+        Array<{ pct: number | null; cumplidas: bigint; con_estado: bigint }>
+      >(
+        Prisma.sql`
             SELECT
               ROUND(100 * SUM(estado_consulta='CUMPLIDA') / NULLIF(SUM(estado_consulta IS NOT NULL),0), 1) AS pct,
               SUM(estado_consulta='CUMPLIDA') AS cumplidas,
               SUM(estado_consulta IS NOT NULL) AS con_estado
             FROM costos c ${whereSql} ${ntConvenios}
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ millones: number | null }>>(
-          Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,
-        ),
-        this.prisma.$queryRaw<Array<{ n: bigint }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<Array<{ millones: number | null }>>(
+        Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,
+      ),
+      this.prisma.$queryRaw<Array<{ n: bigint }>>(
+        Prisma.sql`
             SELECT COUNT(*) AS n FROM (
               SELECT convenio_grupo,
                      100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0) AS pct,
@@ -136,16 +152,18 @@ export class DashboardsService {
               HAVING citas > 100 AND pct < 70
             ) t
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ dias: number | null }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<Array<{ dias: number | null }>>(
+        Prisma.sql`
             SELECT ROUND(AVG(DATEDIFF(fecha_cita, fecha_deseada)),1) AS dias
             FROM costos c ${whereSql}
               AND fecha_deseada IS NOT NULL AND fecha_cita >= fecha_deseada
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ mes: string; citas: bigint; cumplidas: bigint }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<
+        Array<{ mes: string; citas: bigint; cumplidas: bigint }>
+      >(
+        Prisma.sql`
             SELECT DATE_FORMAT(fecha_cita,'%Y-%m') AS mes,
                    COUNT(*) AS citas,
                    SUM(estado_consulta='CUMPLIDA') AS cumplidas
@@ -153,16 +171,18 @@ export class DashboardsService {
               AND fecha_cita IS NOT NULL
             GROUP BY mes ORDER BY mes
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ tipo: string; n: bigint }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<Array<{ tipo: string; n: bigint }>>(
+        Prisma.sql`
             SELECT COALESCE(funcionalidad,'NO DEFINIDO') AS tipo, COUNT(*) AS n
             FROM costos c ${whereSql}
             GROUP BY tipo ORDER BY n DESC
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ convenio_grupo: string; citas: bigint; pct: number | null }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<
+        Array<{ convenio_grupo: string; citas: bigint; pct: number | null }>
+      >(
+        Prisma.sql`
             SELECT convenio_grupo,
                    COUNT(*) AS citas,
                    ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct
@@ -171,22 +191,24 @@ export class DashboardsService {
             GROUP BY convenio_grupo
             ORDER BY citas DESC
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ sede_grupo: string; citas: bigint }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<Array<{ sede_grupo: string; citas: bigint }>>(
+        Prisma.sql`
             SELECT sede_grupo, COUNT(*) AS citas
             FROM costos c ${whereSql}
               AND sede_grupo IS NOT NULL
             GROUP BY sede_grupo ORDER BY citas DESC
           `,
-        ),
-      ]);
+      ),
+    ]);
 
     return {
       meta: serializeRow(meta[0]),
       kpis: {
         cumplimiento: serializeRow(cumplimiento[0]),
-        recuperacionMillones: cumplimiento[0] ? Number(recuperacion[0]?.millones ?? 0) : null,
+        recuperacionMillones: cumplimiento[0]
+          ? Number(recuperacion[0]?.millones ?? 0)
+          : null,
         conveniosRiesgo: Number(conveniosRiesgo[0]?.n ?? 0),
         oportunidadDias: oportunidad[0]?.dias ?? null,
       },
@@ -206,9 +228,14 @@ export class DashboardsService {
     // Meta a nivel ciudad: misma base pero ignorando la sede fisica. Asi, al
     // seleccionar una sede, el KPI muestra su aporte respecto a la ciudad
     // (ejecutado_sede / meta_ciudad). Sin sede seleccionada whereMetaSql == whereSql.
-    const { whereSql: whereMetaSql } = buildCostosWhere({ ...filters, sede: undefined });
+    const { whereSql: whereMetaSql } = buildCostosWhere({
+      ...filters,
+      sede: undefined,
+    });
     const sedeActiva =
-      typeof filters.sede === 'string' && filters.sede.length > 0 && filters.sede !== 'all';
+      typeof filters.sede === 'string' &&
+      filters.sede.length > 0 &&
+      filters.sede !== 'all';
 
     // nt_map colapsado a UNA fila por (cups, convenio): suma la meta de los
     // grupos etarios (programa). Evita que el JOIN multiplique los conteos, sin
@@ -275,13 +302,27 @@ export class DashboardsService {
           ) t
         `;
 
-    const [cumplimientoGlobal, heatmap, desviaciones, tendencia, catalogoNt, contratadoSinEjecutar, ejecutadoFueraNt] =
-      await Promise.all([
-      this.prisma.$queryRaw<Array<{ ejecutado: bigint; meta_periodo: number; pct: number | null }>>(
-        kpiSql,
-      ),
+    const [
+      cumplimientoGlobal,
+      heatmap,
+      desviaciones,
+      tendencia,
+      catalogoNt,
+      contratadoSinEjecutar,
+      ejecutadoFueraNt,
+    ] = await Promise.all([
       this.prisma.$queryRaw<
-        Array<{ convenio: string; cups: string; meta_mes: number; ejecutado: bigint; meses: bigint; pct: number | null }>
+        Array<{ ejecutado: bigint; meta_periodo: number; pct: number | null }>
+      >(kpiSql),
+      this.prisma.$queryRaw<
+        Array<{
+          convenio: string;
+          cups: string;
+          meta_mes: number;
+          ejecutado: bigint;
+          meses: bigint;
+          pct: number | null;
+        }>
       >(
         Prisma.sql`
           WITH top_cups AS (
@@ -342,7 +383,13 @@ export class DashboardsService {
         `,
       ),
       this.prisma.$queryRaw<
-        Array<{ convenio: string; mes: string; ejecutado: bigint; meta_mes: number; pct: number | null }>
+        Array<{
+          convenio: string;
+          mes: string;
+          ejecutado: bigint;
+          meta_mes: number;
+          pct: number | null;
+        }>
       >(
         Prisma.sql`
           WITH meta AS (
@@ -399,7 +446,9 @@ export class DashboardsService {
       // convenios presentes bajo el filtro, que NO tuvieron ninguna ejecucion
       // (consulta) en el periodo. meta = meta_mes * meses del periodo (lo que
       // se esperaba ejecutar y no se ejecuto).
-      this.prisma.$queryRaw<Array<{ cups: string; descripcion: string | null; meta: number }>>(
+      this.prisma.$queryRaw<
+        Array<{ cups: string; descripcion: string | null; meta: number }>
+      >(
         Prisma.sql`
           WITH ejec AS ${this.ejecAgg(whereSql)},
           periodo AS (
@@ -424,7 +473,9 @@ export class DashboardsService {
       // Ejecutado fuera de NT: CUPS ejecutados en costos (bajo el filtro) cuyo
       // codigo NO existe en la nota tecnica (meta > 0). Sirve para detectar CUPS
       // que se prestan pero faltan en nt_map o que no estan contratados.
-      this.prisma.$queryRaw<Array<{ cups: string; descripcion: string | null; ejecutado: bigint }>>(
+      this.prisma.$queryRaw<
+        Array<{ cups: string; descripcion: string | null; ejecutado: bigint }>
+      >(
         Prisma.sql`
           SELECT
             c.cups,
@@ -464,10 +515,19 @@ export class DashboardsService {
       FROM nt_map GROUP BY ${this.convNt('nombre_convenio')}, cups
     )`;
 
-    const [costoReal, costoEsperado, recuperacion, paretoCups, paretoTotal, costoConvenio, recupConvenio] =
-      await Promise.all([
-        this.prisma.$queryRaw<Array<{ millones: number | null; citas_costeadas: bigint }>>(
-          Prisma.sql`
+    const [
+      costoReal,
+      costoEsperado,
+      recuperacion,
+      paretoCups,
+      paretoTotal,
+      costoConvenio,
+      recupConvenio,
+    ] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{ millones: number | null; citas_costeadas: bigint }>
+      >(
+        Prisma.sql`
             SELECT
               ROUND(SUM(m.costo_medio)/1e6, 1) AS millones,
               COUNT(*) AS citas_costeadas
@@ -475,17 +535,22 @@ export class DashboardsService {
             JOIN ${ntMapCosto} m ON m.cups = c.cups AND m.nombre_convenio = ${this.convNt('c.nombre_convenio')}
             ${whereSql}
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ millones: number | null }>>(
-          Prisma.sql`SELECT ROUND(SUM(meta_mes * costo_medio * 5)/1e6, 1) AS millones FROM nt_map`,
-        ),
-        this.prisma.$queryRaw<Array<{ millones: number | null }>>(
-          Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,
-        ),
-        this.prisma.$queryRaw<
-          Array<{ cups: string; descripcion: string | null; n: bigint; millones: number | null }>
-        >(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<Array<{ millones: number | null }>>(
+        Prisma.sql`SELECT ROUND(SUM(meta_mes * costo_medio * 5)/1e6, 1) AS millones FROM nt_map`,
+      ),
+      this.prisma.$queryRaw<Array<{ millones: number | null }>>(
+        Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,
+      ),
+      this.prisma.$queryRaw<
+        Array<{
+          cups: string;
+          descripcion: string | null;
+          n: bigint;
+          millones: number | null;
+        }>
+      >(
+        Prisma.sql`
             SELECT c.cups,
                    (SELECT LEFT(descripcion,50) FROM notas_tecnicas nt WHERE nt.cups=c.cups LIMIT 1) AS descripcion,
                    COUNT(*) AS n,
@@ -496,9 +561,11 @@ export class DashboardsService {
             GROUP BY c.cups
             ORDER BY millones DESC
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ top20: number | null; total: number | null }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<
+        Array<{ top20: number | null; total: number | null }>
+      >(
+        Prisma.sql`
             WITH costo_cups AS (
               SELECT c.cups, SUM(m.costo_medio) AS costo
               FROM costos c JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
@@ -509,11 +576,15 @@ export class DashboardsService {
               (SELECT SUM(costo) FROM (SELECT costo FROM costo_cups ORDER BY costo DESC LIMIT 20) t) AS top20,
               (SELECT SUM(costo) FROM costo_cups) AS total
           `,
-        ),
-        this.prisma.$queryRaw<
-          Array<{ convenio_grupo: string; citas: bigint; millones: number | null }>
-        >(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<
+        Array<{
+          convenio_grupo: string;
+          citas: bigint;
+          millones: number | null;
+        }>
+      >(
+        Prisma.sql`
             SELECT c.convenio_grupo,
                    COUNT(*) AS citas,
                    ROUND(SUM(m.costo_medio)/1e6, 1) AS millones
@@ -524,9 +595,11 @@ export class DashboardsService {
             GROUP BY c.convenio_grupo
             ORDER BY millones DESC
           `,
-        ),
-        this.prisma.$queryRaw<Array<{ convenio_grupo: string; millones: number | null }>>(
-          Prisma.sql`
+      ),
+      this.prisma.$queryRaw<
+        Array<{ convenio_grupo: string; millones: number | null }>
+      >(
+        Prisma.sql`
             SELECT convenio_grupo,
                    ROUND(SUM(valor_recuperacion)/1e6,1) AS millones
             FROM costos c ${whereSql}
@@ -534,12 +607,13 @@ export class DashboardsService {
             GROUP BY convenio_grupo
             ORDER BY millones DESC
           `,
-        ),
-      ]);
+      ),
+    ]);
 
     const top20 = Number(paretoTotal[0]?.top20 ?? 0);
     const total = Number(paretoTotal[0]?.total ?? 0);
-    const paretoTop20Pct = total > 0 ? Math.round((top20 * 100) / total * 10) / 10 : 0;
+    const paretoTop20Pct =
+      total > 0 ? Math.round(((top20 * 100) / total) * 10) / 10 : 0;
 
     return {
       kpis: {
@@ -549,7 +623,9 @@ export class DashboardsService {
         recuperacionMillones: recuperacion[0]?.millones ?? null,
         eficienciaPct:
           (recuperacion[0]?.millones ?? 0) && (costoReal[0]?.millones ?? 0)
-            ? Math.round(((recuperacion[0]!.millones! / costoReal[0]!.millones!) * 100) * 10) / 10
+            ? Math.round(
+                (recuperacion[0].millones! / costoReal[0].millones!) * 100 * 10,
+              ) / 10
             : null,
       },
       paretoCups: paretoCups.map(serializeRow),
@@ -574,9 +650,12 @@ export class DashboardsService {
     const ntConvenios = Prisma.sql`
       AND ${this.convNt('c.nombre_convenio')} IN (SELECT DISTINCT ${this.convNt('nombre_convenio')} FROM nt_map)`;
 
-    const [oportunidad, estadoSede, inasistencia, mixAgenda] = await Promise.all([
-      this.prisma.$queryRaw<Array<{ especialidad: string; n: bigint; dias: number | null }>>(
-        Prisma.sql`
+    const [oportunidad, estadoSede, inasistencia, mixAgenda] =
+      await Promise.all([
+        this.prisma.$queryRaw<
+          Array<{ especialidad: string; n: bigint; dias: number | null }>
+        >(
+          Prisma.sql`
           SELECT especialidad,
                  COUNT(*) AS n,
                  ROUND(AVG(DATEDIFF(fecha_cita, fecha_deseada)),1) AS dias
@@ -586,17 +665,17 @@ export class DashboardsService {
           GROUP BY especialidad
           ORDER BY n DESC
         `,
-      ),
-      this.prisma.$queryRaw<
-        Array<{
-          sede_grupo: string;
-          total: bigint;
-          pct_cump: number | null;
-          pct_incump: number | null;
-          pct_canc: number | null;
-        }>
-      >(
-        Prisma.sql`
+        ),
+        this.prisma.$queryRaw<
+          Array<{
+            sede_grupo: string;
+            total: bigint;
+            pct_cump: number | null;
+            pct_incump: number | null;
+            pct_canc: number | null;
+          }>
+        >(
+          Prisma.sql`
           SELECT sede_grupo,
                  COUNT(*) AS total,
                  ROUND(100*SUM(estado_consulta='CUMPLIDA')/COUNT(*),1) AS pct_cump,
@@ -607,11 +686,11 @@ export class DashboardsService {
           GROUP BY sede_grupo
           ORDER BY total DESC
         `,
-      ),
-      this.prisma.$queryRaw<
-        Array<{ convenio_grupo: string; mes: string; pct: number | null }>
-      >(
-        Prisma.sql`
+        ),
+        this.prisma.$queryRaw<
+          Array<{ convenio_grupo: string; mes: string; pct: number | null }>
+        >(
+          Prisma.sql`
           SELECT convenio_grupo, DATE_FORMAT(fecha_cita,'%Y-%m') AS mes,
                  ROUND(100*SUM(estado_consulta='INCUMPLIDA')/NULLIF(COUNT(*),0),1) AS pct
           FROM costos c ${whereSql} ${ntConvenios}
@@ -620,17 +699,19 @@ export class DashboardsService {
           GROUP BY convenio_grupo, mes
           ORDER BY convenio_grupo, mes
         `,
-      ),
-      this.prisma.$queryRaw<Array<{ sede_grupo: string; tipo_agenda: string; n: bigint }>>(
-        Prisma.sql`
+        ),
+        this.prisma.$queryRaw<
+          Array<{ sede_grupo: string; tipo_agenda: string; n: bigint }>
+        >(
+          Prisma.sql`
           SELECT sede_grupo, tipo_agenda, COUNT(*) AS n
           FROM costos c ${whereSql}
             AND sede_grupo IS NOT NULL
             AND tipo_agenda IS NOT NULL
           GROUP BY sede_grupo, tipo_agenda
         `,
-      ),
-    ]);
+        ),
+      ]);
 
     return {
       oportunidadEspecialidad: oportunidad.map(serializeRow),
@@ -648,7 +729,9 @@ export class DashboardsService {
     const { whereSql } = buildCostosWhere(filters);
 
     const [topProgramas, alertas] = await Promise.all([
-      this.prisma.$queryRaw<Array<{ pym: string; n: bigint; pct_cump: number | null }>>(
+      this.prisma.$queryRaw<
+        Array<{ pym: string; n: bigint; pct_cump: number | null }>
+      >(
         Prisma.sql`
           SELECT pym, COUNT(*) AS n,
                  ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct_cump
@@ -657,7 +740,9 @@ export class DashboardsService {
           GROUP BY pym ORDER BY n DESC
         `,
       ),
-      this.prisma.$queryRaw<Array<{ cohorte: string; poblacion: bigint; pct_cump: number | null }>>(
+      this.prisma.$queryRaw<
+        Array<{ cohorte: string; poblacion: bigint; pct_cump: number | null }>
+      >(
         Prisma.sql`
           SELECT pym AS cohorte,
                  COUNT(*) AS poblacion,
@@ -674,7 +759,8 @@ export class DashboardsService {
     return {
       topProgramas: topProgramas.map(serializeRow),
       alertasCohortes: alertas.map(serializeRow),
-      _warning: 'Grupo etario y poblacion denominador pendientes Fase A del ETL',
+      _warning:
+        'Grupo etario y poblacion denominador pendientes Fase A del ETL',
     };
   }
 }
@@ -683,12 +769,15 @@ export class DashboardsService {
  * Convierte BigInt -> number y Decimal -> number antes de serializar a JSON.
  * NestJS no sabe serializar BigInt nativamente.
  */
-function serializeRow<T extends Record<string, unknown>>(row: T | undefined): T | null {
+function serializeRow<T extends Record<string, unknown>>(
+  row: T | undefined,
+): T | null {
   if (!row) return null;
   const out = {} as Record<string, unknown>;
   for (const [k, v] of Object.entries(row)) {
     if (typeof v === 'bigint') out[k] = Number(v);
-    else if (v !== null && typeof v === 'object' && 'toFixed' in (v as object)) out[k] = Number(v);
+    else if (v !== null && typeof v === 'object' && 'toFixed' in v)
+      out[k] = Number(v);
     else out[k] = v;
   }
   return out as T;

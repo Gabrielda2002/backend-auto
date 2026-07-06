@@ -21,8 +21,12 @@ export class FiltrosService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Sedes presentes en costos (no del catalogo: lo realmente cargado) */
-  async getSedes(): Promise<Array<{ value: string; label: string; citas: number }>> {
-    const rows = await this.prisma.$queryRaw<Array<{ nombre_sede: string; n: bigint }>>(
+  async getSedes(): Promise<
+    Array<{ value: string; label: string; citas: number }>
+  > {
+    const rows = await this.prisma.$queryRaw<
+      Array<{ nombre_sede: string; n: bigint }>
+    >(
       Prisma.sql`
         SELECT nombre_sede, COUNT(*) AS n FROM costos
         WHERE nombre_sede IS NOT NULL
@@ -37,7 +41,9 @@ export class FiltrosService {
   }
 
   /** Convenios presentes en costos */
-  async getConvenios(): Promise<Array<{ value: string; label: string; citas: number; tieneNT: boolean }>> {
+  async getConvenios(): Promise<
+    Array<{ value: string; label: string; citas: number; tieneNT: boolean }>
+  > {
     const rows = await this.prisma.$queryRaw<
       Array<{ nombre_convenio: string; n: bigint; tiene_nt: number }>
     >(
@@ -69,7 +75,9 @@ export class FiltrosService {
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { grupoEspecialidad: _omit, especialidad: _e, ...rest } = filters;
     const { whereSql } = buildCostosWhere(rest);
-    const rows = await this.prisma.$queryRaw<Array<{ grupo_especialidad: string; n: bigint }>>(
+    const rows = await this.prisma.$queryRaw<
+      Array<{ grupo_especialidad: string; n: bigint }>
+    >(
       Prisma.sql`
         SELECT grupo_especialidad, COUNT(*) AS n FROM costos c ${whereSql}
           AND grupo_especialidad IS NOT NULL AND grupo_especialidad <> ''
@@ -85,7 +93,11 @@ export class FiltrosService {
   }
 
   /** Rango fechas cubierto en costos (para defaults del front) */
-  async getRangoFechas(): Promise<{ desde: string | null; hasta: string | null; totalCitas: number }> {
+  async getRangoFechas(): Promise<{
+    desde: string | null;
+    hasta: string | null;
+    totalCitas: number;
+  }> {
     const rows = await this.prisma.$queryRaw<
       Array<{ desde: Date | null; hasta: Date | null; total: bigint }>
     >(
@@ -111,7 +123,9 @@ export class FiltrosService {
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { convenio: _omit, ...rest } = filters;
     const { whereSql } = buildCostosWhere(rest);
-    const rows = await this.prisma.$queryRaw<Array<{ convenio_grupo: string; n: bigint }>>(
+    const rows = await this.prisma.$queryRaw<
+      Array<{ convenio_grupo: string; n: bigint }>
+    >(
       Prisma.sql`
         SELECT convenio_grupo, COUNT(*) AS n FROM costos c ${whereSql}
           AND convenio_grupo IS NOT NULL AND convenio_grupo <> ''
@@ -136,7 +150,9 @@ export class FiltrosService {
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { sedeGrupo: _g, sede: _s, ...rest } = filters;
     const { whereSql } = buildCostosWhere(rest);
-    const rows = await this.prisma.$queryRaw<Array<{ sede_grupo: string; n: bigint }>>(
+    const rows = await this.prisma.$queryRaw<
+      Array<{ sede_grupo: string; n: bigint }>
+    >(
       Prisma.sql`
         SELECT sede_grupo, COUNT(*) AS n FROM costos c ${whereSql}
           AND sede_grupo IS NOT NULL AND sede_grupo <> ''
@@ -186,7 +202,10 @@ export class FiltrosService {
 
     const map = new Map<
       string,
-      { citas: number; sedes: Array<{ value: string; label: string; citas: number }> }
+      {
+        citas: number;
+        sedes: Array<{ value: string; label: string; citas: number }>;
+      }
     >();
     for (const r of rows) {
       const ciudad = map.get(r.sede_grupo) ?? { citas: 0, sedes: [] };
@@ -194,7 +213,11 @@ export class FiltrosService {
       ciudad.citas += n;
       // Solo sedes con volumen relevante (descarta ruido cruzado).
       if (r.nombre_sede && n >= MIN_CITAS_SEDE) {
-        ciudad.sedes.push({ value: r.nombre_sede, label: r.nombre_sede, citas: n });
+        ciudad.sedes.push({
+          value: r.nombre_sede,
+          label: r.nombre_sede,
+          citas: n,
+        });
       }
       map.set(r.sede_grupo, ciudad);
     }
@@ -206,7 +229,10 @@ export class FiltrosService {
     // sede homonima.
     const ciudades = new Set(map.keys());
     const sedeCity = (nombreSede: string) =>
-      nombreSede.replace(/^NORDVITAL IPS\s*-?\s*SEDE\s*/i, '').trim().toUpperCase();
+      nombreSede
+        .replace(/^NORDVITAL IPS\s*-?\s*SEDE\s*/i, '')
+        .trim()
+        .toUpperCase();
 
     return Array.from(map.entries())
       .map(([ciudad, v]) => ({
@@ -260,7 +286,10 @@ export class FiltrosService {
 
     const map = new Map<
       string,
-      { citas: number; convenios: Array<{ value: string; label: string; citas: number }> }
+      {
+        citas: number;
+        convenios: Array<{ value: string; label: string; citas: number }>;
+      }
     >();
     for (const r of rows) {
       const grupo = map.get(r.convenio_grupo) ?? { citas: 0, convenios: [] };
@@ -268,13 +297,22 @@ export class FiltrosService {
       grupo.citas += n;
       // Solo convenios con volumen relevante (descarta residuales).
       if (r.convenio && n >= MIN_CITAS_CONV) {
-        grupo.convenios.push({ value: r.convenio, label: r.convenio, citas: n });
+        grupo.convenios.push({
+          value: r.convenio,
+          label: r.convenio,
+          citas: n,
+        });
       }
       map.set(r.convenio_grupo, grupo);
     }
 
     return Array.from(map.entries())
-      .map(([grupo, v]) => ({ value: grupo, label: grupo, citas: v.citas, convenios: v.convenios }))
+      .map(([grupo, v]) => ({
+        value: grupo,
+        label: grupo,
+        citas: v.citas,
+        convenios: v.convenios,
+      }))
       .sort((a, b) => b.citas - a.citas);
   }
 
@@ -286,7 +324,9 @@ export class FiltrosService {
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { modalidad: _omit, ...rest } = filters;
     const { whereSql } = buildCostosWhere(rest);
-    const rows = await this.prisma.$queryRaw<Array<{ modalidad: string; n: bigint }>>(
+    const rows = await this.prisma.$queryRaw<
+      Array<{ modalidad: string; n: bigint }>
+    >(
       Prisma.sql`
         SELECT modalidad, COUNT(*) AS n FROM costos c ${whereSql}
           AND modalidad IS NOT NULL AND modalidad <> ''
@@ -309,7 +349,9 @@ export class FiltrosService {
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { regimen: _omit, ...rest } = filters;
     const { whereSql } = buildCostosWhere(rest);
-    const rows = await this.prisma.$queryRaw<Array<{ regimen_grupo: string; n: bigint }>>(
+    const rows = await this.prisma.$queryRaw<
+      Array<{ regimen_grupo: string; n: bigint }>
+    >(
       Prisma.sql`
         SELECT regimen_grupo, COUNT(*) AS n FROM costos c ${whereSql}
           AND regimen_grupo IS NOT NULL AND regimen_grupo <> ''
