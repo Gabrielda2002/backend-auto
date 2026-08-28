@@ -303,6 +303,23 @@ async function main() {
   }
   console.log(`cat_cups_pana: ${panaCount} registros`);
 
+  // ── festivos (festivos nacionales de Colombia 2025-2026) ──
+  // Se insertan como literales DATE via SQL crudo para evitar el desfase de
+  // zona horaria que produce convertir un Date de JS a una columna DATE.
+  const festivos = [
+    '2025-01-01', '2025-01-06', '2025-03-24', '2025-04-17', '2025-04-18', '2025-05-01',
+    '2025-06-02', '2025-06-23', '2025-06-30', '2025-07-20', '2025-08-07', '2025-08-18',
+    '2025-10-13', '2025-11-03', '2025-11-17', '2025-12-08', '2025-12-25',
+    '2026-01-01', '2026-01-12', '2026-03-23', '2026-04-02', '2026-04-03', '2026-05-01',
+    '2026-05-18', '2026-06-08', '2026-06-15', '2026-06-29', '2026-07-20', '2026-08-07',
+    '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25',
+  ];
+  await prisma.$executeRawUnsafe('DELETE FROM festivos');
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO festivos (dia) VALUES ${festivos.map((d) => `('${d}')`).join(', ')}`,
+  );
+  console.log(`festivos: ${await prisma.festivo.count()} registros`);
+
   console.log('\nSeed completado exitosamente.');
 }
 

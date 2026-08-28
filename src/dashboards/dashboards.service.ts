@@ -31,6 +31,15 @@ export class DashboardsService {
     return Prisma.sql`AND NOT (LEFT(c.cups,4) IN ('8902','8903') AND (c.funcionalidad <> 'CONSULTA' OR c.funcionalidad IS NULL))`;
   }
 
+  private excluirAgendasNoAsistenciales(): Prisma.Sql {
+    return Prisma.sql`AND UPPER(TRIM(COALESCE(c.nombre_medico, ''))) <> 'TOMA DE MUESTRAS NUEVA EPS CUCUTA'`;
+  }
+
+  // Excluye citas canceladas de los conteos mostrados (null-safe: NULL cuenta).
+  private excluirCanceladas(): Prisma.Sql {
+    return Prisma.sql`AND NOT (c.estado_consulta <=> 'CANCELADA')`;
+  }
+
   /**
    * Agregado por (convenio, cups) bajo `where`: n (citas) y meses (meses
    * distintos con ejecucion). Evita COUNT(DISTINCT ...) por grupo (lento):
@@ -48,13 +57,32 @@ export class DashboardsService {
         SELECT ${this.convNt('c.nombre_convenio')} AS nombre_convenio, c.cups,
                EXTRACT(YEAR_MONTH FROM c.fecha_cita) AS ym, COUNT(*) AS cnt
         FROM costos c ${where}
-          AND c.cups IS NOT NULL AND c.nombre_convenio IS NOT NULL ${this.soloConsulta()} ${extra}
+          AND c.cups IS NOT NULL AND c.nombre_convenio IS NOT NULL
+          ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()} ${extra}
         GROUP BY ${this.convNt('c.nombre_convenio')}, c.cups, EXTRACT(YEAR_MONTH FROM c.fecha_cita)
       ) t
       GROUP BY t.nombre_convenio, t.cups
     )`;
   }
-
+  /**
+   * Oportunidad en DIAS HABILES entre las columnas dAsig y dCita, excluyendo
+   * domingos y festivos (tabla `festivos`). Los sabados SI cuentan. Mismo dia = 0.
+   * = DATEDIFF - domingos - festivos_no_domingo, en el intervalo (dAsig, dCita].
+   *  - domingos en (A,B]: FLOOR((DATEDIFF(B,A) + DAYOFWEEK(A) - 1) / 7)
+   *    (verificado para los 7 dias de inicio).
+   *  - festivos no-domingo: COUNT de festivos.dia en (A,B] con DAYOFWEEK <> 1
+   *    (los festivos que caen en domingo ya se restaron arriba; no se cuentan dos veces).
+   * Pasar las columnas calificadas, p.ej. 'c.fecha_asig'.
+   */
+  private diasHabiles(dAsig: string, dCita: string): Prisma.Sql {
+    const a = Prisma.raw(dAsig);
+    const b = Prisma.raw(dCita);
+    return Prisma.sql`(
+      DATEDIFF(${b}, ${a})
+      - FLOOR((DATEDIFF(${b}, ${a}) + DAYOFWEEK(${a}) - 1) / 7)
+      - (SELECT COUNT(*) FROM festivos f WHERE f.dia > ${a} AND f.dia <= ${b} AND DAYOFWEEK(f.dia) <> 1)
+    )`;
+  }
   // ═══════════════════════════════════════════════════════════════
   //  ADMIN: reconstruir tabla puente nt_map
   // ═══════════════════════════════════════════════════════════════
@@ -131,10 +159,11 @@ export class DashboardsService {
       >(
         Prisma.sql`
             SELECT
-              ROUND(100 * SUM(estado_consulta='CUMPLIDA') / NULLIF(SUM(estado_consulta IS NOT NULL),0), 1) AS pct,
+              ROUND(100 * SUM(estado_consulta='CUMPLIDA') / NULLIF(SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA'),0), 1) AS pct,
               SUM(estado_consulta='CUMPLIDA') AS cumplidas,
-              SUM(estado_consulta IS NOT NULL) AS con_estado
+              SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA') AS con_estado
             FROM costos c ${whereSql} ${ntConvenios}
+              ${this.excluirAgendasNoAsistenciales()}
           `,
       ),
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
@@ -144,20 +173,22 @@ export class DashboardsService {
         Prisma.sql`
             SELECT COUNT(*) AS n FROM (
               SELECT convenio_grupo,
-                     100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0) AS pct,
+                     100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA'),0) AS pct,
                      COUNT(*) AS citas
               FROM costos c ${whereSql}
                 AND convenio_grupo IS NOT NULL ${ntConvenios}
+                ${this.excluirAgendasNoAsistenciales()}
               GROUP BY convenio_grupo
-              HAVING citas > 100 AND pct < 70
+              HAVING citas > 100 AND pct < 90
             ) t
           `,
       ),
       this.prisma.$queryRaw<Array<{ dias: number | null }>>(
         Prisma.sql`
-            SELECT ROUND(AVG(DATEDIFF(fecha_cita, fecha_deseada)),1) AS dias
+            SELECT ROUND(AVG(${this.diasHabiles('c.fecha_asig', 'c.fecha_cita')}),1) AS dias
             FROM costos c ${whereSql}
-              AND fecha_deseada IS NOT NULL AND fecha_cita >= fecha_deseada
+              AND c.fecha_asig IS NOT NULL AND c.fecha_cita >= c.fecha_asig
+              ${this.excluirCanceladas()}
           `,
       ),
       this.prisma.$queryRaw<
@@ -169,6 +200,8 @@ export class DashboardsService {
                    SUM(estado_consulta='CUMPLIDA') AS cumplidas
             FROM costos c ${whereSql}
               AND fecha_cita IS NOT NULL
+              ${this.excluirAgendasNoAsistenciales()}
+              ${this.excluirCanceladas()}
             GROUP BY mes ORDER BY mes
           `,
       ),
@@ -176,6 +209,7 @@ export class DashboardsService {
         Prisma.sql`
             SELECT COALESCE(funcionalidad,'NO DEFINIDO') AS tipo, COUNT(*) AS n
             FROM costos c ${whereSql}
+              ${this.excluirCanceladas()}
             GROUP BY tipo ORDER BY n DESC
           `,
       ),
@@ -184,12 +218,13 @@ export class DashboardsService {
       >(
         Prisma.sql`
             SELECT convenio_grupo,
-                   COUNT(*) AS citas,
-                   ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct
+                   SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA') AS citas,
+                   ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA'),0),1) AS pct
             FROM costos c ${whereSql}
               AND convenio_grupo IS NOT NULL ${ntConvenios}
+              ${this.excluirAgendasNoAsistenciales()}
             GROUP BY convenio_grupo
-            ORDER BY citas DESC
+            ORDER BY pct DESC, citas DESC
           `,
       ),
       this.prisma.$queryRaw<Array<{ sede_grupo: string; citas: bigint }>>(
@@ -197,6 +232,7 @@ export class DashboardsService {
             SELECT sede_grupo, COUNT(*) AS citas
             FROM costos c ${whereSql}
               AND sede_grupo IS NOT NULL
+              ${this.excluirCanceladas()}
             GROUP BY sede_grupo ORDER BY citas DESC
           `,
       ),
@@ -276,7 +312,8 @@ export class DashboardsService {
               JOIN (
                 SELECT ${this.convNt('c.nombre_convenio')} AS nombre_convenio, c.cups, COUNT(*) AS ejec_sede
                 FROM costos c ${whereSql}
-                  AND c.cups IS NOT NULL AND c.nombre_convenio IS NOT NULL ${this.soloConsulta()}
+                  AND c.cups IS NOT NULL AND c.nombre_convenio IS NOT NULL
+                  ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()}
                 GROUP BY ${this.convNt('c.nombre_convenio')}, c.cups
               ) s ON s.cups = city.cups AND s.nombre_convenio = city.nombre_convenio
             ) num
@@ -329,7 +366,7 @@ export class DashboardsService {
             SELECT c.cups
             FROM costos c
             JOIN ${ntMap} m ON m.cups = c.cups AND m.nombre_convenio = ${this.convNt('c.nombre_convenio')}
-            ${whereSql} ${this.soloConsulta()}
+            ${whereSql} ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()}
             GROUP BY c.cups
             ORDER BY COUNT(*) DESC
             LIMIT 8
@@ -399,7 +436,8 @@ export class DashboardsService {
           ejec AS (
             SELECT ${this.convNt('c.nombre_convenio')} AS nombre_convenio, DATE_FORMAT(c.fecha_cita,'%Y-%m') AS mes, COUNT(*) AS n
             FROM costos c ${whereSql}
-              AND c.fecha_cita IS NOT NULL AND c.nombre_convenio IS NOT NULL ${this.soloConsulta()}
+              AND c.fecha_cita IS NOT NULL AND c.nombre_convenio IS NOT NULL
+              ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()}
             GROUP BY ${this.convNt('c.nombre_convenio')}, mes
           )
           SELECT
@@ -454,10 +492,12 @@ export class DashboardsService {
           periodo AS (
             SELECT GREATEST(COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM c.fecha_cita)), 1) AS meses
             FROM costos c ${whereSql} AND c.fecha_cita IS NOT NULL
+              ${this.excluirAgendasNoAsistenciales()}
           ),
           conv_scope AS (
             SELECT DISTINCT ${this.convNt('c.nombre_convenio')} AS nombre_convenio
             FROM costos c ${whereSql} AND c.nombre_convenio IS NOT NULL
+              ${this.excluirAgendasNoAsistenciales()}
           )
           SELECT
             m.cups,
@@ -484,6 +524,7 @@ export class DashboardsService {
           FROM costos c ${whereSql}
             AND c.cups IS NOT NULL
             AND c.cups NOT IN (SELECT cups FROM nt_map WHERE meta_mes > 0)
+            ${this.excluirAgendasNoAsistenciales()}
           GROUP BY c.cups
           ORDER BY ejecutado DESC
         `,
@@ -534,6 +575,7 @@ export class DashboardsService {
             FROM costos c
             JOIN ${ntMapCosto} m ON m.cups = c.cups AND m.nombre_convenio = ${this.convNt('c.nombre_convenio')}
             ${whereSql}
+              ${this.excluirCanceladas()}
           `,
       ),
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
@@ -558,6 +600,7 @@ export class DashboardsService {
             FROM costos c
             JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
             ${whereSql}
+              ${this.excluirCanceladas()}
             GROUP BY c.cups
             ORDER BY millones DESC
           `,
@@ -570,6 +613,7 @@ export class DashboardsService {
               SELECT c.cups, SUM(m.costo_medio) AS costo
               FROM costos c JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
               ${whereSql}
+              ${this.excluirCanceladas()}
               GROUP BY c.cups
             )
             SELECT
@@ -592,6 +636,7 @@ export class DashboardsService {
             JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
             ${whereSql}
               AND c.convenio_grupo IS NOT NULL
+              ${this.excluirCanceladas()}
             GROUP BY c.convenio_grupo
             ORDER BY millones DESC
           `,
@@ -658,10 +703,11 @@ export class DashboardsService {
           Prisma.sql`
           SELECT especialidad,
                  COUNT(*) AS n,
-                 ROUND(AVG(DATEDIFF(fecha_cita, fecha_deseada)),1) AS dias
+                 ROUND(AVG(${this.diasHabiles('c.fecha_asig', 'c.fecha_cita')}),1) AS dias
           FROM costos c ${whereSql}
-            AND fecha_deseada IS NOT NULL AND fecha_cita >= fecha_deseada
+            AND c.fecha_asig IS NOT NULL AND c.fecha_cita >= c.fecha_asig
             AND especialidad IS NOT NULL AND especialidad <> ''
+            ${this.excluirCanceladas()}
           GROUP BY especialidad
           ORDER BY n DESC
         `,
@@ -683,6 +729,7 @@ export class DashboardsService {
                  ROUND(100*SUM(estado_consulta='CANCELADA')/COUNT(*),1) AS pct_canc
           FROM costos c ${whereSql}
             AND sede_grupo IS NOT NULL AND estado_consulta IS NOT NULL
+            ${this.excluirAgendasNoAsistenciales()}
           GROUP BY sede_grupo
           ORDER BY total DESC
         `,
@@ -696,6 +743,8 @@ export class DashboardsService {
           FROM costos c ${whereSql} ${ntConvenios}
             AND convenio_grupo IS NOT NULL
             AND fecha_cita IS NOT NULL
+            ${this.excluirAgendasNoAsistenciales()}
+            ${this.excluirCanceladas()}
           GROUP BY convenio_grupo, mes
           ORDER BY convenio_grupo, mes
         `,
@@ -708,6 +757,7 @@ export class DashboardsService {
           FROM costos c ${whereSql}
             AND sede_grupo IS NOT NULL
             AND tipo_agenda IS NOT NULL
+            ${this.excluirCanceladas()}
           GROUP BY sede_grupo, tipo_agenda
         `,
         ),
@@ -737,6 +787,8 @@ export class DashboardsService {
                  ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct_cump
           FROM costos c ${whereSql}
             AND pym IS NOT NULL AND pym <> ''
+            ${this.excluirAgendasNoAsistenciales()}
+            ${this.excluirCanceladas()}
           GROUP BY pym ORDER BY n DESC
         `,
       ),
@@ -749,6 +801,8 @@ export class DashboardsService {
                  ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct_cump
           FROM costos c ${whereSql}
             AND pym IS NOT NULL AND pym <> ''
+            ${this.excluirAgendasNoAsistenciales()}
+            ${this.excluirCanceladas()}
           GROUP BY pym
           HAVING poblacion > 200 AND pct_cump < 80
           ORDER BY pct_cump ASC LIMIT 8

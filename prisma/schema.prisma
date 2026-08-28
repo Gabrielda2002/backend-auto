@@ -407,3 +407,12 @@ model NtMap {
   @@index([cups, nombreConvenio], map: "ix_cups_conv")
   @@map("nt_map")
 }
+
+/// Festivos nacionales de Colombia. Se usa para calcular la oportunidad en
+/// dias habiles (excluye domingos y festivos) entre fecha_asig y fecha_cita.
+/// Se siembra via prisma/seed.ts (festivos 2025-2026).
+model Festivo {
+  dia DateTime @id @db.Date
+
+  @@map("festivos")
+}
