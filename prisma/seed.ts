@@ -314,11 +314,15 @@ async function main() {
     '2026-05-18', '2026-06-08', '2026-06-15', '2026-06-29', '2026-07-20', '2026-08-07',
     '2026-08-17', '2026-10-12', '2026-11-02', '2026-11-16', '2026-12-08', '2026-12-25',
   ];
-  await prisma.$executeRawUnsafe('DELETE FROM festivos');
-  await prisma.$executeRawUnsafe(
-    `INSERT INTO festivos (dia) VALUES ${festivos.map((d) => `('${d}')`).join(', ')}`,
-  );
-  console.log(`festivos: ${await prisma.festivo.count()} registros`);
+  // DELETE + INSERT en una transaccion: si el insert falla, la tabla no
+  // queda vacia (el delete se revierte junto con todo el bloque).
+  await prisma.$transaction([
+    prisma.$executeRawUnsafe('DELETE FROM festivos'),
+    prisma.$executeRawUnsafe(
+      `INSERT INTO festivos (dia) VALUES ${festivos.map((d) => `('${d}')`).join(', ')}`,
+    ),
+  ]);
+  console.log(`festivos: ${await prisma.festivos.count()} registros`);
 
   console.log('\nSeed completado exitosamente.');
 }

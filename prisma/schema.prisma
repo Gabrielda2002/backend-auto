@@ -199,14 +199,14 @@ model RawPana {
   codigoContrato             String?  @db.VarChar(30) @map("codigo_contrato")
   nombreCnt                  String?  @db.VarChar(255) @map("nombre_cnt")
   planCnt                    String?  @db.VarChar(50) @map("plan_cnt")
-  fechaCita                  DateTime? @db.DateTime @map("fecha_cita")
+  fechaCita                  DateTime? @db.DateTime(0) @map("fecha_cita")
   consultorio                String?  @db.VarChar(20)
   turno                      DateTime? @db.Time
   cuotaRecuperacion          Decimal?  @db.Decimal(18, 2) @map("cuota_recuperacion")
-  citaMasProxima             DateTime? @db.DateTime @map("cita_mas_proxima")
-  fechaDeseada               DateTime? @db.DateTime @map("fecha_deseada")
+  citaMasProxima             DateTime? @db.DateTime(0) @map("cita_mas_proxima")
+  fechaDeseada               DateTime? @db.DateTime(0) @map("fecha_deseada")
   estado                     String?  @db.VarChar(100)
-  fechaAsig                  DateTime? @db.DateTime @map("fecha_asig")
+  fechaAsig                  DateTime? @db.DateTime(0) @map("fecha_asig")
   codigoSede                 String?  @db.VarChar(20) @map("codigo_sede")
   nombreSede                 String?  @db.VarChar(100) @map("nombre_sede")
   codigoMedico               String?  @db.VarChar(30) @map("codigo_medico")
@@ -219,14 +219,14 @@ model RawPana {
   tipoAgenda                 String?  @db.VarChar(100) @map("tipo_agenda")
   codigoUsuarioAsignacion    String?  @db.VarChar(255) @map("codigo_usuario_asignacion")
   nombreUsuarioAsignacion    String?  @db.VarChar(255) @map("nombre_usuario_asignacion")
-  fechaAtencion              DateTime? @db.DateTime @map("fecha_atencion")
+  fechaAtencion              DateTime? @db.DateTime(0) @map("fecha_atencion")
   dxPpalAtencion             String?  @db.VarChar(10) @map("dx_ppal_atencion")
   nombreDxPpalAtencion      String?  @db.VarChar(500) @map("nombre_dx_ppal_atencion")
   citaDoble                  String?  @db.VarChar(20) @map("cita_doble")
   usuarioCumplimiento        String?  @db.VarChar(255) @map("usuario_cumplimiento")
-  fechaCumplimiento          DateTime? @db.DateTime @map("fecha_cumplimiento")
+  fechaCumplimiento          DateTime? @db.DateTime(0) @map("fecha_cumplimiento")
   procAgendado               String?  @db.VarChar(255) @map("proc_agendado")
-  fechaAtencionProc          DateTime? @db.DateTime @map("fecha_atencion_proc")
+  fechaAtencionProc          DateTime? @db.DateTime(0) @map("fecha_atencion_proc")
   usuarioAtencionProc        String?  @db.VarChar(255) @map("usuario_atencion_proc")
   turnoExtra                 String?  @db.VarChar(20) @map("turno_extra")
   ctrlPostQx                  String?  @db.VarChar(20) @map("ctrl_post_qx")
@@ -355,7 +355,7 @@ model Costos {
   grupoEspecialidad        String?  @db.VarChar(150) @map("grupo_especialidad")
   nombreMpio               String?  @db.VarChar(100) @map("nombre_mpio")
   entidadAdministradora    String?  @db.VarChar(150) @map("entidad_administradora")
-  fechaCarga               DateTime @default(now()) @db.DateTime @map("fecha_carga")
+  fechaCarga               DateTime @default(now()) @db.DateTime(0) @map("fecha_carga")
   convenioGrupo            String?  @db.VarChar(50) @map("convenio_grupo")
   sedeGrupo                String?  @db.VarChar(50) @map("sede_grupo")
   modalidad                String?  @db.VarChar(50)
@@ -411,7 +411,7 @@ model NtMap {
 /// Festivos nacionales de Colombia. Se usa para calcular la oportunidad en
 /// dias habiles (excluye domingos y festivos) entre fecha_asig y fecha_cita.
 /// Se siembra via prisma/seed.ts (festivos 2025-2026).
-model Festivo {
+model Festivos {
   dia DateTime @id @db.Date
 
   @@map("festivos")
