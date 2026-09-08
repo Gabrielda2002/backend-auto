@@ -1,0 +1,310 @@
+<mxfile host="Electron" agent="Nordvital Dashboard">
+  <diagram id="dashboard-flujo" name="Dashboard NT - datos, formulas y tablas">
+    <mxGraphModel dx="2864" dy="593" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#1a1a1a;" value="Nordvital IPS — Dashboard: ¿qué elementos usa, de dónde vienen los datos, qué fórmulas aplica y qué tablas de la BD toca?" vertex="1">
+          <mxGeometry height="28" width="1860" x="30" y="18" as="geometry" />
+        </mxCell>
+        <mxCell id="bandA" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#9fc0e8;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#2a5d8f;opacity=60;" value="1 · ORÍGENES (ETL)" vertex="1">
+          <mxGeometry height="960" width="200" x="-270" y="69.5" as="geometry" />
+        </mxCell>
+        <mxCell id="bandB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#a5d6a7;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#2e7d32;opacity=60;" value="2 · BASE DE DATOS (citas_db · MariaDB)" vertex="1">
+          <mxGeometry height="960" width="250" x="70" y="62" as="geometry" />
+        </mxCell>
+        <mxCell id="bandC" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ffcc80;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#e65100;opacity=60;" value="3 · BACKEND NestJS + Prisma (dashboards.service.ts)" vertex="1">
+          <mxGeometry height="960" width="380" x="520" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bandD" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#ce93d8;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#6a1b9a;opacity=50;" value="4 · DASHBOARDS (elementos + fórmulas + tablas)" vertex="1">
+          <mxGeometry height="960" width="690" x="1090" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bandE" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fde7e9;strokeColor=#f5b7bd;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#b71c1c;opacity=60;" value="5 · FRONTEND (radicar-app-frond)" vertex="1">
+          <mxGeometry height="960" width="260" x="1990" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="src_plenus" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="PLENUS" vertex="1">
+          <mxGeometry height="34" width="150" x="-245" y="114.5" as="geometry" />
+        </mxCell>
+        <mxCell id="src_pana" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="PANA" vertex="1">
+          <mxGeometry height="34" width="150" x="-245" y="154.5" as="geometry" />
+        </mxCell>
+        <mxCell id="src_sap" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="SAP" vertex="1">
+          <mxGeometry height="34" width="150" x="-245" y="194.5" as="geometry" />
+        </mxCell>
+        <mxCell id="src_lab" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="LAB" vertex="1">
+          <mxGeometry height="34" width="150" x="-245" y="234.5" as="geometry" />
+        </mxCell>
+        <mxCell id="src_odonto" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="ODONTO" vertex="1">
+          <mxGeometry height="34" width="150" x="-245" y="274.5" as="geometry" />
+        </mxCell>
+        <mxCell id="etl_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#6c8ebf;fontSize=11;align=center;" value="ETL (Python)&lt;br&gt;bots Playwright / PyAutoGUI&lt;br&gt;04_insert_costos.sql&lt;br&gt;homologación CUPS + catálogos" vertex="1">
+          <mxGeometry height="90" width="170" x="-255" y="339.5" as="geometry" />
+        </mxCell>
+        <mxCell id="etl_note" parent="1" style="text;html=1;align=center;fontSize=9;fontColor=#555555;" value="repo:&lt;br&gt;automatización-costos-vs-nota-técnica" vertex="1">
+          <mxGeometry height="30" width="170" x="-255" y="434.5" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_costos" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;costos&lt;/b&gt;  (tabla maestra)&lt;br&gt;~1.09M filas · 1 fila = 1 cita&lt;br&gt;fecha_cita · estado_consulta · cups&lt;br&gt;nombre_convenio · nombre_sede&lt;br&gt;funcionalidad · valor_recuperacion&lt;br&gt;especialidad · fecha_asig / fecha_deseada&lt;br&gt;+ agrupadores: convenio_grupo, sede_grupo,&lt;br&gt;modalidad, regimen_grupo" vertex="1">
+          <mxGeometry height="150" width="220" x="85" y="102" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_notas" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;notas_tecnicas&lt;/b&gt;&lt;br&gt;metas contratadas por (cups, convenio)&lt;br&gt;n_eventos_mes · costo_medio_evento" vertex="1">
+          <mxGeometry height="70" width="220" x="85" y="267" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_ntmap" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;nt_map&lt;/b&gt;  (puente)&lt;br&gt;(cups, nombre_convenio) → meta_mes&lt;br&gt;derivada de notas_tecnicas&lt;br&gt;NUEVA EPS unificada · &#39;/ SUBSIDIADO&#39; duplicado" vertex="1">
+          <mxGeometry height="90" width="220" x="85" y="352" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_festivos" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;festivos&lt;/b&gt;&lt;br&gt;días hábiles (oportunidad)" vertex="1">
+          <mxGeometry height="50" width="220" x="85" y="457" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_cat" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;cat_*&lt;/b&gt;  (catálogos)&lt;br&gt;cat_cups · cat_convenio_agrupador · …" vertex="1">
+          <mxGeometry height="55" width="220" x="85" y="522" as="geometry" />
+        </mxCell>
+        <mxCell id="filtros_bar" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#f0a30a;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;buildCostosWhere(filtros)&lt;/b&gt;&lt;br&gt;periodo · sede · convenio ·&lt;br&gt;modalidad · régimen · grupo especialidad" vertex="1">
+          <mxGeometry height="70" width="340" x="540" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="helpers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#f0a30a;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;Helpers SQL crudo&lt;/b&gt;&lt;br&gt;convNt() · soloConsulta() · excluirAgendas()&lt;br&gt;ejecAgg() · diasHabiles(festivos)&lt;br&gt;periodoMeses() · contratadoScope()&lt;br&gt;serializeRow() (BigInt/Decimal → number)" vertex="1">
+          <mxGeometry height="105" width="340" x="540" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_resumen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd966;strokeColor=#d6b656;fontSize=10;" value="GET /api/dashboards/resumen" vertex="1">
+          <mxGeometry height="32" width="340" x="540" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_ejec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd966;strokeColor=#d6b656;fontSize=10;" value="GET /api/dashboards/ejecucion-nt" vertex="1">
+          <mxGeometry height="32" width="340" x="540" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_fin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd966;strokeColor=#d6b656;fontSize=10;" value="GET /api/dashboards/financiero" vertex="1">
+          <mxGeometry height="32" width="340" x="540" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_cal" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd966;strokeColor=#d6b656;fontSize=10;" value="GET /api/dashboards/calidad" vertex="1">
+          <mxGeometry height="32" width="340" x="540" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_pym" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd966;strokeColor=#d6b656;fontSize=10;" value="GET /api/dashboards/pym" vertex="1">
+          <mxGeometry height="32" width="340" x="540" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="ep_filtros" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" value="GET /api/filtros/*  (selects facetados de la barra)" vertex="1">
+          <mxGeometry height="34" width="340" x="540" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="rule_nt" parent="1" style="text;html=1;align=left;fontSize=9;fontColor=#8a5a00;" value="Regla transversal: el cumplimiento se mide SOLO sobre convenios con nota técnica&lt;div&gt;(nombre_convenio IN nt_map).&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="340" x="540" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="d_resumen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;" value="&lt;b&gt;① RESUMEN GERENCIAL&lt;/b&gt;&lt;br&gt;• % cumplimiento = 100·CUMPLIDA / (con_estado, sin canceladas)  [conv NT]&lt;br&gt;• Recuperación $M = Σ valor_recuperacion / 1e6&lt;br&gt;• Convenios en riesgo (&lt; 90% y &gt; 100 citas)&lt;br&gt;• Oportunidad = AVG(días hábiles: fecha_asig → fecha_cita)&lt;br&gt;• Evolución mensual · Top convenios · Volumen por sede&lt;br&gt;&lt;i&gt;Tablas: costos (+ nt_map para el filtro NT)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="140" width="660" x="1105" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="d_ejec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;" value="&lt;b&gt;② EJECUCIÓN vs NOTA TÉCNICA&lt;/b&gt;&lt;br&gt;• KPI cumplimiento = SUM(LEAST(ejecutado, meta)) / SUM(meta)&lt;br&gt;• meta = meta_mes × meses del periodo · TODOS los convenios contratados (contratadoScope)&lt;br&gt;• Catálogo NT por CUPS · Heatmap convenio × CUPS&lt;br&gt;• Contratado sin ejecutar · Ejecutado fuera de NT&lt;br&gt;• Reglas: convNt (NUEVA EPS) · soloConsulta (cups 8902/8903 solo si funcionalidad=CONSULTA)&lt;br&gt;&lt;i&gt;Tablas: costos + nt_map + notas_tecnicas&lt;/i&gt;" vertex="1">
+          <mxGeometry height="165" width="660" x="1105" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="d_fin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;" value="&lt;b&gt;③ ANÁLISIS FINANCIERO&lt;/b&gt;&lt;br&gt;• Costo real $M = Σ nt_map.costo_medio (citas con cups+convenio en NT)&lt;br&gt;• Costo esperado $M = Σ meta_mes × costo_medio × 5  (fijo, sin filtro)&lt;br&gt;• Eficiencia = recuperación / costo real&lt;br&gt;• Pareto CUPS · Costo por convenio&lt;br&gt;&lt;i&gt;Tablas: costos + nt_map (costo_medio). NO usa soloConsulta&lt;/i&gt;" vertex="1">
+          <mxGeometry height="130" width="660" x="1105" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="d_cal" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;" value="&lt;b&gt;④ CALIDAD Y OPORTUNIDAD&lt;/b&gt;&lt;br&gt;• Oportunidad por especialidad = AVG(días hábiles asig → cita)&lt;br&gt;• Inasistencia mensual = INCUMPLIDA / total  [conv NT]&lt;br&gt;• Estado por sede (cumplida / incumplida / cancelada) · Mix de agenda&lt;br&gt;&lt;i&gt;Tablas: costos + festivos (+ nt_map)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="115" width="660" x="1105" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="d_pym" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;" value="&lt;b&gt;⑤ PyM / RIAS&lt;/b&gt;&lt;br&gt;• Cumplimiento por programa = CUMPLIDA / con_estado, agrupado por pym&lt;br&gt;• Alertas cohortes (población &gt; 200 y cumplimiento &lt; 80%)&lt;br&gt;• _warning: grupo etario / población denominador pendiente (Fase A ETL)&lt;br&gt;&lt;i&gt;Tablas: costos&lt;/i&gt;" vertex="1">
+          <mxGeometry height="110" width="660" x="1105" y="685" as="geometry" />
+        </mxCell>
+        <mxCell id="note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#c0a000;fontSize=10;align=left;spacingLeft=8;verticalAlign=middle;" value="&lt;b&gt;PRINCIPIO&lt;/b&gt;: toda la lógica de cálculo vive en el BACKEND (SQL crudo parametrizado, dashboards.service.ts). El frontend solo consume el JSON, valida con Zod y pinta.&#xa;→ Cambiar un NÚMERO = solo backend.  Cambiar el SHAPE (agregar/renombrar campos) = backend + schema Zod del panel." vertex="1">
+          <mxGeometry height="70" width="660" x="1105" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_filtros" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Filtros globales&lt;br&gt;sincronizados a la URL&lt;br&gt;(useGlobalFiltersFromUrl)" vertex="1">
+          <mxGeometry height="60" width="210" x="2015" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_query" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="TanStack Query&lt;br&gt;(caché por panel)" vertex="1">
+          <mxGeometry height="50" width="210" x="2015" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_zod" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Validación Zod&lt;br&gt;(schema por panel)" vertex="1">
+          <mxGeometry height="50" width="210" x="2015" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_charts" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Recharts / SVG&lt;br&gt;KPIs · charts · tablas" vertex="1">
+          <mxGeometry height="50" width="210" x="2015" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="fe_pages" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Páginas (radicar / featuures/Dashboards):&lt;br&gt;resumen · ejecucion-nt ·&lt;br&gt;financiero · calidad · pym" vertex="1">
+          <mxGeometry height="70" width="210" x="2015" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="src_plenus" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#6c8ebf;" target="etl_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-360" y="131.5" />
+              <mxPoint x="-360" y="384.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="src_pana" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#6c8ebf;" target="etl_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-340" y="171.5" />
+              <mxPoint x="-340" y="384.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="src_sap" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#6c8ebf;" target="etl_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-320" y="211.5" />
+              <mxPoint x="-320" y="384.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="src_lab" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#6c8ebf;" target="etl_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-300" y="251.5" />
+              <mxPoint x="-300" y="384.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="src_odonto" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#6c8ebf;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="etl_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-280" y="291.5" />
+              <mxPoint x="-280" y="384.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#82b366;fontSize=9;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="tbl_costos" value="TRUNCATE + INSERT">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="5" y="375" />
+              <mxPoint x="5" y="177" />
+            </Array>
+            <mxPoint x="-70" y="375" as="sourcePoint" />
+            <mxPoint x="100" y="176.99999999999977" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="tbl_notas" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#82b366;fontSize=9;" target="tbl_ntmap" value="rebuildNtMap()">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="tbl_costos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#f0a30a;fontSize=9;" target="helpers" value="SQL (alias c)">
+          <mxGeometry relative="1" x="-0.3069" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="380" y="170" />
+              <mxPoint x="380" y="238" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="tbl_ntmap" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#f0a30a;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="helpers">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="400" />
+              <mxPoint x="380" y="238" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="tbl_festivos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#f0a30a;fontSize=9;" target="helpers" value="diasHabiles">
+          <mxGeometry relative="1" x="0.3208" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="375" y="480" />
+              <mxPoint x="375" y="420" />
+              <mxPoint x="420" y="420" />
+              <mxPoint x="420" y="238" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="filtros_bar" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#f0a30a;fontSize=9;" target="helpers" value="WHERE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="helpers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#d6b656;" target="ep_resumen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="237.5" />
+              <mxPoint x="500" y="336.0000000000001" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="helpers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#d6b656;" target="ep_ejec">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="238" />
+              <mxPoint x="490" y="376" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="helpers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#d6b656;" target="ep_fin">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="238" />
+              <mxPoint x="480" y="416" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="helpers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#d6b656;" target="ep_cal">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="238" />
+              <mxPoint x="470" y="456" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="helpers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#d6b656;" target="ep_pym">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="460" y="238" />
+              <mxPoint x="460" y="496" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="ep_resumen" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#9673a6;fontSize=9;" target="d_resumen" value="JSON">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="336" />
+              <mxPoint x="960" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="ep_ejec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#9673a6;fontSize=9;" target="d_ejec" value="JSON">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="ep_fin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#9673a6;fontSize=9;" target="d_fin" value="JSON">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="980" y="416" />
+              <mxPoint x="980" y="485" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="ep_cal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#9673a6;fontSize=9;" target="d_cal" value="JSON">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="950" y="456" />
+              <mxPoint x="950" y="618" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="ep_pym" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#9673a6;fontSize=9;" target="d_pym" value="JSON">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="496" />
+              <mxPoint x="920" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="d_ejec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#b85450;" target="fe_query">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1930" y="328" />
+              <mxPoint x="1930" y="328" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="fe_query" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#b85450;" target="fe_zod">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="fe_zod" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#b85450;" target="fe_charts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="fe_charts" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#b85450;" target="fe_pages">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="fe_filtros" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;dashed=1;strokeColor=#b85450;fontSize=9;" target="ep_filtros" value="filtros (URL) → API">
+          <mxGeometry relative="1" x="0.2256" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1890" y="130" />
+              <mxPoint x="1890" y="920" />
+              <mxPoint x="710" y="920" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
