@@ -64,6 +64,43 @@ export class DashboardsService {
       GROUP BY t.nombre_convenio, t.cups
     )`;
   }
+
+  /**
+   * Meses del periodo bajo `where`: numero de meses distintos con datos en
+   * costos (fecha_cita). Base de meta para TODOS los convenios contratados
+   * (con o sin ejecucion), no solo los meses con ejecucion.
+   */
+  private periodoMeses(where: Prisma.Sql): Prisma.Sql {
+    return Prisma.sql`(
+      SELECT GREATEST(COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM c.fecha_cita)), 1)
+      FROM costos c ${where} AND c.fecha_cita IS NOT NULL
+        ${this.excluirAgendasNoAsistenciales()}
+    )`;
+  }
+
+  /**
+   * Universo CONTRATADO bajo `where`: todos los pares (convenio, cups) de la
+   * nota tecnica (meta_mes>0) para los convenios con actividad en el filtro,
+   * tengan o no ejecucion. meta = meta_mes * meses del periodo; n = ejecucion
+   * (0 si el par no ejecuto). La meta suma TODOS los convenios contratados,
+   * no solo los que ejecutaron (KPI y catalogo de Ejecucion NT).
+   */
+  private contratadoScope(where: Prisma.Sql, ntMap: Prisma.Sql): Prisma.Sql {
+    return Prisma.sql`(
+      SELECT m.nombre_convenio, m.cups,
+             m.meta_mes * ${this.periodoMeses(where)} AS meta,
+             COALESCE(e.n, 0) AS n
+      FROM ${ntMap} m
+      JOIN (
+        SELECT DISTINCT ${this.convNt('c.nombre_convenio')} AS nombre_convenio
+        FROM costos c ${where} AND c.nombre_convenio IS NOT NULL
+          ${this.excluirAgendasNoAsistenciales()}
+      ) cs ON cs.nombre_convenio = m.nombre_convenio
+      LEFT JOIN ${this.ejecAgg(where)} e
+        ON e.cups = m.cups AND e.nombre_convenio = m.nombre_convenio
+    )`;
+  }
+
   /**
    * Oportunidad en DIAS HABILES entre las columnas dAsig y dCita, excluyendo
    * domingos y festivos (tabla `festivos`). Los sabados SI cuentan. Mismo dia = 0.
@@ -293,6 +330,9 @@ export class DashboardsService {
     //  - SIN sede (ciudad / global): cumplimiento REAL con tope al 100% por
     //    (convenio, cups): la sobre-ejecucion de un CUPS no compensa el deficit
     //    de otro -> SUM(LEAST(ejecutado, meta)) / SUM(meta), acotado a 100%.
+    //  - META = contratado total: meta_mes * meses del periodo de TODOS los
+    //    convenios contratados en el filtro (con o sin ejecucion), via
+    //    contratadoScope; un convenio sin ejecucion suma meta y 0 ejecutado.
     const kpiSql = sedeActiva
       ? Prisma.sql`
           SELECT
@@ -305,7 +345,8 @@ export class DashboardsService {
                 LEAST(city.ejec_city, city.meta) * s.ejec_sede / city.ejec_city
               ), 0) AS ejecutado
               FROM (
-                SELECT e.nombre_convenio, e.cups, e.n AS ejec_city, m.meta_mes * e.meses AS meta
+                SELECT e.nombre_convenio, e.cups, e.n AS ejec_city,
+                       m.meta_mes * ${this.periodoMeses(whereMetaSql)} AS meta
                 FROM ${this.ejecAgg(whereMetaSql)} e
                 JOIN ${ntMap} m ON m.cups = e.cups AND m.nombre_convenio = e.nombre_convenio
               ) city
@@ -319,12 +360,8 @@ export class DashboardsService {
             ) num
             CROSS JOIN
             (
-              SELECT COALESCE(SUM(city.meta), 0) AS meta_periodo
-              FROM (
-                SELECT m.meta_mes * e.meses AS meta
-                FROM ${this.ejecAgg(whereMetaSql)} e
-                JOIN ${ntMap} m ON m.cups = e.cups AND m.nombre_convenio = e.nombre_convenio
-              ) city
+              SELECT COALESCE(SUM(t.meta), 0) AS meta_periodo
+              FROM ${this.contratadoScope(whereMetaSql, ntMap)} t
             ) den
         `
       : Prisma.sql`
@@ -332,11 +369,7 @@ export class DashboardsService {
             ROUND(COALESCE(SUM(LEAST(t.n, t.meta)), 0)) AS ejecutado,
             ROUND(COALESCE(SUM(t.meta), 0)) AS meta_periodo,
             ROUND(100 * COALESCE(SUM(LEAST(t.n, t.meta)), 0) / NULLIF(SUM(t.meta), 0), 1) AS pct
-          FROM (
-            SELECT e.n AS n, m.meta_mes * e.meses AS meta
-            FROM ${this.ejecAgg(whereSql)} e
-            JOIN ${ntMap} m ON m.cups = e.cups AND m.nombre_convenio = e.nombre_convenio
-          ) t
+          FROM ${this.contratadoScope(whereSql, ntMap)} t
         `;
 
     const [
@@ -451,12 +484,13 @@ export class DashboardsService {
           ORDER BY e.nombre_convenio, e.mes
         `,
       ),
-      // Catalogo NT por CUPS: SOLO los CUPS efectivamente ejecutados bajo el
-      // filtro actual (sede / convenio / periodo) que existen en la nota
-      // tecnica. Usa la misma base de meta que kpiCumplimientoGlobal (INNER
-      // JOIN a nt_map, meta_mes * meses ejecutados) para que la suma del
-      // catalogo reconcilie exactamente con el KPI en cualquier filtro
-      // (p. ej. CUCUTA = union de sus sedes 01-07).
+      // Catalogo NT por CUPS: TODOS los CUPS contratados (meta_mes>0) para los
+      // convenios con actividad bajo el filtro, tengan o no ejecucion. Usa la
+      // misma base que kpiCumplimientoGlobal (contratadoScope: meta_mes * meses
+      // del periodo de TODOS los convenios contratados) para que la suma del
+      // catalogo reconcilie con el KPI. La meta de cada CUPS suma todos los
+      // convenios contratados, no solo los que ejecutaron (p. ej. CUCUTA 931001
+      // incluye NUEVA EPS aunque no haya ejecutado ese CUPS).
       this.prisma.$queryRaw<
         Array<{
           cups: string;
@@ -467,16 +501,14 @@ export class DashboardsService {
         }>
       >(
         Prisma.sql`
-          WITH ejec AS ${this.ejecAgg(whereSql)}
           SELECT
-            e.cups,
-            (SELECT LEFT(descripcion,90) FROM notas_tecnicas nt WHERE nt.cups=e.cups LIMIT 1) AS descripcion,
-            SUM(m.meta_mes * e.meses) AS meta,
-            SUM(e.n) AS ejecutado,
-            ROUND(100*SUM(e.n)/NULLIF(SUM(m.meta_mes * e.meses),0),1) AS pct
-          FROM ejec e
-          JOIN ${ntMap} m ON m.cups = e.cups AND m.nombre_convenio = e.nombre_convenio
-          GROUP BY e.cups
+            t.cups,
+            (SELECT LEFT(descripcion,90) FROM notas_tecnicas nt WHERE nt.cups=t.cups LIMIT 1) AS descripcion,
+            SUM(t.meta) AS meta,
+            SUM(t.n) AS ejecutado,
+            ROUND(100*SUM(t.n)/NULLIF(SUM(t.meta),0),1) AS pct
+          FROM ${this.contratadoScope(whereSql, ntMap)} t
+          GROUP BY t.cups
           ORDER BY pct IS NULL, pct DESC
         `,
       ),
