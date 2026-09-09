@@ -752,6 +752,18 @@ export class DashboardsService {
                 (recuperacion[0].millones! / costoReal[0].millones!) * 100 * 10,
               ) / 10
             : null,
+        // Ejecucion en VALOR frente a la nota tecnica: cuanto del contrato del
+        // periodo se ejecuto realmente, en pesos. Es el equivalente monetario
+        // del cumplimiento de Ejecucion NT (que va en citas).
+        // OJO al leerlo: el numerador solo cuenta las citas cuyo par
+        // (cups, convenio) existe en la NT, asi que lo ejecutado fuera de la
+        // nota tecnica no suma. Es un porcentaje conservador por diseno.
+        ejecucionNtPct:
+          (costoEsperado[0]?.millones ?? 0) && (costoReal[0]?.millones ?? 0)
+            ? Math.round(
+                (costoReal[0].millones! / costoEsperado[0].millones!) * 100 * 10,
+              ) / 10
+            : null,
       },
       paretoCups: paretoCups.map(serializeRow),
       paretoTop20Pct,
