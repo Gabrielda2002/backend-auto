@@ -18,7 +18,12 @@ export class PrismaService
         configService.get<string>('DB_PASS') ??
         configService.get<string>('DB_PASSWORD', ''),
       database: configService.get<string>('DB_NAME', 'citas_db'),
-      connectionLimit: 10,
+      // Cada endpoint de dashboards dispara sus consultas en Promise.all
+      // (resumen 9, ejecucion-nt 7, financiero 7) y el frontend ademas pide
+      // varios /filtros/* a la vez. Con un pool de 10 una sola carga de pagina
+      // lo saturaba y el resto quedaba encolado: de ahi los 35 s observados en
+      // produccion y el 500 por timeout del proxy a los 10 s.
+      connectionLimit: configService.get<number>('DB_POOL_SIZE', 25),
     });
     super({ adapter });
   }
