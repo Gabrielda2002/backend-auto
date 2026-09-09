@@ -102,6 +102,45 @@ export class DashboardsService {
   }
 
   /**
+   * Costo CONTRATADO por mes bajo `where`, en pesos. Se lee de
+   * `notas_tecnicas` (la fuente) y NO de `nt_map`: nt_map desdobla cada
+   * contrato 'X CONTRIBUTIVO / SUBSIDIADO' en dos filas para que el JOIN
+   * contra costos matchee por regimen, asi que sumarlo directo cuenta el
+   * contrato dos veces (inflaba ~39% el costo esperado del Financiero).
+   *
+   * Se acota a los convenios con actividad bajo el filtro, invirtiendo el
+   * desdoble de rebuildNtMap(): cada fila de la NT puede aparecer en costos
+   * bajo una de dos variantes de nombre, y basta que cualquiera este activa.
+   *
+   * OJO: la nota tecnica NO tiene dimension de sede. Al filtrar por sede el
+   * resultado es "el contrato completo de los convenios que operan en esa
+   * sede", no una meta prorrateada por sede — misma semantica que
+   * contratadoScope en ejecucion-nt.
+   */
+  private contratoMensual(where: Prisma.Sql): Prisma.Sql {
+    const activos = Prisma.sql`(
+      SELECT DISTINCT ${this.convNt('c.nombre_convenio')}
+      FROM costos c ${where} AND c.nombre_convenio IS NOT NULL
+        ${this.excluirAgendasNoAsistenciales()}
+    )`;
+    // Las dos variantes de nombre que rebuildNtMap() genera por fila de la NT.
+    const sinSufijo = `CASE WHEN nt.convenio LIKE '% / SUBSIDIADO'
+                            THEN REPLACE(nt.convenio,' / SUBSIDIADO','')
+                            ELSE nt.convenio END`;
+    const comoSubsidiado = `REPLACE(REPLACE(nt.convenio,' / SUBSIDIADO',''),' CONTRIBUTIVO',' SUBSIDIADO')`;
+    return Prisma.sql`(
+      SELECT COALESCE(SUM(nt.n_eventos_mes * nt.costo_medio_evento), 0)
+      FROM notas_tecnicas nt
+      WHERE nt.cups IS NOT NULL
+        AND (
+          ${this.convNt(sinSufijo)} IN ${activos}
+          OR (nt.convenio LIKE '% / SUBSIDIADO'
+              AND ${this.convNt(comoSubsidiado)} IN ${activos})
+        )
+    )`;
+  }
+
+  /**
    * Oportunidad en DIAS HABILES entre las columnas dAsig y dCita, excluyendo
    * domingos y festivos (tabla `festivos`). Los sabados SI cuentan. Mismo dia = 0.
    * = DATEDIFF - domingos - festivos_no_domingo, en el intervalo (dAsig, dCita].
@@ -610,8 +649,17 @@ export class DashboardsService {
               ${this.excluirCanceladas()}
           `,
       ),
+      // Costo esperado NT = contrato mensual x meses del periodo, ambos bajo el
+      // filtro activo. Antes era `SUM(meta_mes*costo_medio*5) FROM nt_map`, que
+      // tenia tres defectos: no aplicaba el WHERE (el KPI nunca se movia),
+      // multiplicaba por un 5 fijo (el periodo ya es de 9 meses) y sumaba sobre
+      // nt_map, que duplica por regimen (+39%).
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
-        Prisma.sql`SELECT ROUND(SUM(meta_mes * costo_medio * 5)/1e6, 1) AS millones FROM nt_map`,
+        Prisma.sql`
+            SELECT ROUND(
+              ${this.contratoMensual(whereSql)} * ${this.periodoMeses(whereSql)} / 1e6
+            , 1) AS millones
+          `,
       ),
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
         Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,

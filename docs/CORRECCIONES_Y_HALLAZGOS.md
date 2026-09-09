@@ -255,6 +255,81 @@ dashboard** para verlo (backend en watch; caché ~5 min).
 
 ---
 
+### C4 — ETL nota técnica: prorratear el costo entre los CUPS de una línea multi-CUPS
+**Archivo:** `automatizaci-n-costos-vs-nota-tecnica/scripts/utiles/convertir_notas_tecnicas.py`
+(`convertir()`).
+
+En el Excel de la NT una fila puede traer **varios CUPS separados por coma** (un
+paquete, o un grupo de alternativas). El conversor la explota en una fila por CUPS
+y **replicaba el `costo_medio_evento` íntegro en cada una** — decisión explícita
+comentada como «El costo se replica tal cual (opcion 2)». El resultado es que el
+contrato se contaba N veces.
+
+```python
+# antes del explode
+df["costo_medio_evento"] = df["costo_medio_evento"] / df["cups"].apply(len)
+```
+
+**Impacto medido:** las **48 líneas multi-CUPS de la NT son todas de COOSALUD PYMS**
+(24 contributivo + 24 subsidiado); ningún otro de los 11 convenios tiene líneas
+multi-CUPS. Aportaban 80,9 M/mes y al explotar pasaban a 515,9 M/mes (×6,4).
+
+| | antes | ahora |
+|---|---:|---:|
+| `notas_tecnicas` total | 3.457,6 M/mes | **3.030,4 M/mes** (= el Excel) |
+| COOSALUD (los 4 contratos) | 1.148,3 M | **721,2 M** |
+| COOSALUD CAPITA PYMS SUBSIDIADO | 457,1 M | 182,8 M |
+| COOSALUD CAPITA PYMS CONTRIBUTIVO | 289,0 M | 136,2 M |
+| Los otros 9 convenios | — | **sin cambio (1,00x)** |
+
+> Se prorratea en vez de asignar el costo a un solo CUPS para que el Pareto del
+> Financiero no muestre un uroanálisis como el procedimiento más caro de la IPS
+> y sus 7 componentes hermanos en cero.
+
+**Efecto colateral esperado:** el **costo real** también baja, porque `getFinanciero`
+promedia `costo_medio` desde `nt_map`. Una cita del CUPS `903815` ahora vale su
+parte del panel (11.238) y no el panel completo (89.905). Global: esperado
+31.118,7 → 27.273,8 M y real 16.163,4 → 15.954,1 M.
+
+**Verificado (2026-09-09):** recarga con `py scripts\utiles\convertir_notas_tecnicas.py`
+(7.700 filas) + `POST /api/dashboards/admin/rebuild-nt-map` (12.660 filas). El
+endpoint real con filtro Mar 2026 / CUCUTA / COOSALUD devuelve
+`costoEsperadoMillones = 721.2`, el valor confirmado por negocio.
+
+**Estado:** ✅ aplicado y verificado en `citas_db`.
+
+---
+
+### H5 — Las líneas de "alternativas" replican `n_eventos_mes` y sobreestiman la meta
+**Dónde:** `notas_tecnicas` (origen) + el `explode` de `convertir_notas_tecnicas.py`.
+
+Las 48 líneas multi-CUPS mezclan **dos casos semánticamente distintos**, y hoy el ETL
+los trata igual:
+
+| descripción | CUPS | qué es | ¿replicar eventos? |
+|---|---:|---|:---:|
+| `Tamizaje de Riesgo Cardiovascular: Uroanálisis…` | 7–8 | **paquete** (se hacen todos) | ✅ sí |
+| `Tamizaje para Anemia Hemoglobina y Hematocrito` | 2 | **paquete** | ✅ sí |
+| `Atención en Salud por Medicina General **o** …` | 3, 4, 6, 10 | **alternativas** (se hace una) | ❌ no |
+
+Para un paquete la replicación es correcta: 194 tamizajes al mes son 194 uroanálisis
++ 194 glicemias + … Para las alternativas **sobreestima**: «medicina general *o*
+familiar, 57 veces al mes» se convierte en una meta de 57 × 6 = 342.
+
+**Efecto:** los eventos pasan de **156.956/mes** en el Excel a **164.876/mes** tras
+explotar (**+5%**). Afecta la meta de **Ejecución NT**, no al Financiero (el costo ya
+quedó resuelto en C4).
+
+**Por qué no se corrigió:** distinguir ambos casos automáticamente exigiría parsear el
+texto de la descripción buscando « o », que es frágil y propenso a falsos positivos.
+Es una **decisión de negocio**: hay que confirmar con quien armó la NT si esas líneas
+son excluyentes y, de serlo, marcarlas en el origen (una columna `tipo_linea`
+paquete/alternativa) en vez de inferirlas.
+
+**Estado:** 🔲 **pendiente — requiere definición de negocio.**
+
+---
+
 ## Pendientes / decisiones
 
 | # | Tema | Tipo | Estado |
@@ -262,3 +337,9 @@ dashboard** para verlo (backend en watch; caché ~5 min).
 | H1 | Meta `1` en NUEVA EPS 890211 | Dato (NT) | ❌ cerrado — no es bug, valor real |
 | H3 | Meta del catálogo debe sumar todos los convenios contratados (con o sin ejecución) | Backend | ✅ corregido C3 |
 | H4 | ODONTO: funcionalidad/estado NULL (resuelto C2); quedan CUPS fuera de `cat_cups` y codigo_origen NULL (29.478) | Dato (ETL odonto) | parcial |
+| H5 | Líneas de alternativas («… o …») replican `n_eventos_mes` y sobreestiman la meta ~5% | Dato (NT) | 🔲 pendiente — definición de negocio |
+
+> **Nota sobre H1:** queda parcialmente reinterpretado por C4. Los CUPS `903895`,
+> `903868`, `903818` y `903815` de COMPENSAR CAJICA que se habían leído como «metas
+> de relleno» son en realidad componentes del paquete de tamizaje cardiovascular
+> explotado, no valores de relleno.
