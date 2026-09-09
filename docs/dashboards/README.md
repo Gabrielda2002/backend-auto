@@ -33,6 +33,6 @@ Todos los valores numéricos hardcoded (KPIs, %, $, nombres de convenios, sedes 
 
 ## Configuración estática (compartida)
 
-- **Tokens Tailwind/M3** (colores, spacing, fontFamily, fontSize, borderRadius): idénticos en los 5 HTML. Centralizar en `web/tailwind.config.ts`.
+- **Tokens Tailwind/M3** (colores, spacing, fontFamily, fontSize, borderRadius): idénticos en los 5 HTML. Centralizar en un único `tailwind.config` del proyecto frontend.
 - **Fuentes externas**: Google Fonts `Inter` + `Material Symbols Outlined`.
 - **Tailwind CDN**: `cdn.tailwindcss.com?plugins=forms,container-queries` — solo para preview; en React se usa build de Tailwind.
