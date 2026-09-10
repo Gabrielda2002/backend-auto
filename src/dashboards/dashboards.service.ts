@@ -146,6 +146,23 @@ export class DashboardsService {
     )`;
   }
 
+  /**
+   * Hay una sede FISICA seleccionada (no la ciudad, no "todas").
+   *
+   * Es la bisagra de los KPIs que se comparan contra la nota tecnica: la NT no
+   * tiene dimension de sede, asi que una sede fisica no tiene meta ni contrato
+   * propios. Cuando esto es true, los denominadores (meta, costo esperado) se
+   * calculan a nivel CIUDAD y el KPI pasa a leerse como el APORTE de la sede a
+   * su ciudad, no como un cumplimiento propio.
+   */
+  private sedeSeleccionada(filters: DashboardFiltersDto): boolean {
+    return (
+      typeof filters.sede === 'string' &&
+      filters.sede.length > 0 &&
+      filters.sede !== 'all'
+    );
+  }
+
   // ═══════════════════════════════════════════════════════════════
   //  HELPERS SOBRE EL PRE-AGREGADO costos_agg (alias `a`)
   // ═══════════════════════════════════════════════════════════════
@@ -625,10 +642,7 @@ export class DashboardsService {
       ...filters,
       sede: undefined,
     });
-    const sedeActiva =
-      typeof filters.sede === 'string' &&
-      filters.sede.length > 0 &&
-      filters.sede !== 'all';
+    const sedeActiva = this.sedeSeleccionada(filters);
 
     // nt_map colapsado a UNA fila por (cups, convenio): suma la meta de los
     // grupos etarios (programa). Evita que el JOIN multiplique los conteos, sin
@@ -662,7 +676,12 @@ export class DashboardsService {
             -- exacto, para no arrastrar el error al porcentaje.
             ROUND(num.ejecutado) AS ejecutado,
             den.meta_periodo AS meta_periodo,
-            ROUND(100 * num.ejecutado / NULLIF(den.meta_periodo, 0), 1) AS pct
+            -- Ejecutado de la CIUDAD entera, para poder leer la sede como
+            -- aporte. Las sedes reconcilian con el (verificado: la suma de las
+            -- sedes de una ciudad da su ejecutado capado).
+            den.ejecutado_total AS ejecutado_total,
+            ROUND(100 * num.ejecutado / NULLIF(den.meta_periodo, 0), 1) AS pct,
+            ROUND(100 * num.ejecutado / NULLIF(den.ejecutado_total, 0), 1) AS aporte_pct
           FROM
             (
               SELECT COALESCE(SUM(
@@ -684,7 +703,11 @@ export class DashboardsService {
             ) num
             CROSS JOIN
             (
-              SELECT COALESCE(SUM(t.meta), 0) AS meta_periodo
+              -- meta y ejecutado de la ciudad salen del MISMO recorrido de
+              -- contratadoScope: pedirlos por separado lo evaluaria dos veces,
+              -- y es la subconsulta mas cara del endpoint.
+              SELECT COALESCE(SUM(t.meta), 0) AS meta_periodo,
+                     ROUND(COALESCE(SUM(LEAST(t.n, t.meta)), 0)) AS ejecutado_total
               FROM ${this.contratadoScope(whereMetaSql, ntMap)} t
             ) den
         `
@@ -692,7 +715,11 @@ export class DashboardsService {
           SELECT
             ROUND(COALESCE(SUM(LEAST(t.n, t.meta)), 0)) AS ejecutado,
             ROUND(COALESCE(SUM(t.meta), 0)) AS meta_periodo,
-            ROUND(100 * COALESCE(SUM(LEAST(t.n, t.meta)), 0) / NULLIF(SUM(t.meta), 0), 1) AS pct
+            -- Sin sede fisica no hay un "total" al que aportar: este ES el
+            -- total. NULL le dice al front que muestre cumplimiento, no aporte.
+            NULL AS ejecutado_total,
+            ROUND(100 * COALESCE(SUM(LEAST(t.n, t.meta)), 0) / NULLIF(SUM(t.meta), 0), 1) AS pct,
+            NULL AS aporte_pct
           FROM ${this.contratadoScope(whereSql, ntMap)} t
         `;
 
@@ -706,7 +733,13 @@ export class DashboardsService {
       ejecutadoFueraNt,
     ] = await Promise.all([
       this.prisma.$queryRaw<
-        Array<{ ejecutado: bigint; meta_periodo: number; pct: number | null }>
+        Array<{
+          ejecutado: bigint;
+          meta_periodo: number;
+          ejecutado_total: number | null;
+          pct: number | null;
+          aporte_pct: number | null;
+        }>
       >(kpiSql),
       this.prisma.$queryRaw<
         Array<{
@@ -915,6 +948,19 @@ export class DashboardsService {
 
   async getFinanciero(filters: DashboardFiltersDto) {
     const { whereSql } = buildAggWhere(filters);
+    // Mismo criterio que ejecucion-nt: la nota tecnica NO tiene dimension de
+    // sede, asi que el contrato se calcula a nivel CIUDAD y no se mueve al
+    // bajar a una sede fisica. Antes se calculaba con el filtro completo y el
+    // denominador se encogia: `contratoMensual` se acota a los convenios
+    // activos bajo el filtro y `periodoMeses` a los meses con datos, y una sede
+    // suele tener menos de ambos. Medido en CHIA: la ciudad esperaba 8.889,1M y
+    // SEDE CHIA mostraba 3.304,1M, lo que inflaba su ejecucion de 13,2% a 35,5%.
+    // Sin sede seleccionada whereMetaSql == whereSql.
+    const { whereSql: whereMetaSql } = buildAggWhere({
+      ...filters,
+      sede: undefined,
+    });
+    const sedeActiva = this.sedeSeleccionada(filters);
     // nt_map colapsado por (cups, convenio): un costo_medio por par (promedio de
     // los grupos etarios). Evita que el JOIN multiplique el costo y el conteo de
     // citas costeadas (mismo motivo que en ejecucion-nt), sin tocar nt_map.
@@ -931,6 +977,7 @@ export class DashboardsService {
       paretoTotal,
       costoConvenio,
       recupConvenio,
+      costoRealTotal,
     ] = await Promise.all([
       this.prisma.$queryRaw<
         Array<{ millones: number | null; citas_costeadas: bigint }>
@@ -955,7 +1002,7 @@ export class DashboardsService {
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
         Prisma.sql`
             SELECT ROUND(
-              ${this.contratoMensual(whereSql)} * ${this.periodoMeses(whereSql)} / 1e6
+              ${this.contratoMensual(whereMetaSql)} * ${this.periodoMeses(whereMetaSql)} / 1e6
             , 1) AS millones
           `,
       ),
@@ -1040,6 +1087,22 @@ export class DashboardsService {
             ORDER BY millones DESC
           `,
       ),
+      // Costo real de la CIUDAD, para leer la sede como aporte ("esta sede pone
+      // el 39,6% de los $7.441,3M de CUCUTA"). Es la misma consulta que
+      // costoReal pero con la sede fuera del WHERE. Solo se lanza si hay una
+      // sede fisica seleccionada: sin ella el total ya es costoReal y pedirlo
+      // seria repetir la consulta mas cara del endpoint.
+      sedeActiva
+        ? this.prisma.$queryRaw<Array<{ millones: number | null }>>(
+            Prisma.sql`
+            SELECT ROUND(SUM(m.costo_medio * a.citas)/1e6, 1) AS millones
+            FROM costos_agg a
+            JOIN ${ntMapCosto} m ON m.cups = a.cups AND m.nombre_convenio = a.convenio_nt
+            ${whereMetaSql}
+              ${this.aggExcluirCanceladas()}
+          `,
+          )
+        : Promise.resolve([]),
     ]);
 
     const top20 = Number(paretoTotal[0]?.top20 ?? 0);
@@ -1047,10 +1110,24 @@ export class DashboardsService {
     const paretoTop20Pct =
       total > 0 ? Math.round(((top20 * 100) / total) * 10) / 10 : 0;
 
+    // Aporte de la sede fisica al costo real de su ciudad. null sin sede
+    // seleccionada: ahi el KPI ya ES el total y no hay nada a que aportar.
+    const costoRealTotalMillones = sedeActiva
+      ? (costoRealTotal[0]?.millones ?? null)
+      : null;
+    const aporteCostoRealPct =
+      costoRealTotalMillones && costoReal[0]?.millones
+        ? Math.round(
+            (costoReal[0].millones / costoRealTotalMillones) * 100 * 10,
+          ) / 10
+        : null;
+
     return {
       kpis: {
         costoRealMillones: costoReal[0]?.millones ?? null,
         citasCosteadas: Number(costoReal[0]?.citas_costeadas ?? 0),
+        costoRealTotalMillones,
+        aporteCostoRealPct,
         costoEsperadoMillones: costoEsperado[0]?.millones ?? null,
         recuperacionMillones: recuperacion[0]?.millones ?? null,
         eficienciaPct:
