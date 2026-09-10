@@ -57,4 +57,15 @@ export class DashboardsController {
   rebuildNtMap() {
     return this.service.rebuildNtMap();
   }
+
+  /**
+   * Endpoint admin para reconstruir el pre-agregado costos_agg.
+   * Llamar despues de cada corrida del ETL, porque `costos` se reconstruye
+   * entera en cada carga y el agregado queda desactualizado. No cacheado.
+   */
+  @Post('admin/rebuild-agregado')
+  @HttpCode(200)
+  rebuildAgregado() {
+    return this.service.rebuildAgregado();
+  }
 }

@@ -1,8 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { DashboardFiltersDto } from './dto/dashboard-filters.dto';
-import { buildCostosWhere } from './dashboard-filters.helper';
+import { buildAggWhere, buildCostosWhere } from './dashboard-filters.helper';
 
 @Injectable()
 export class DashboardsService {
@@ -52,14 +57,15 @@ export class DashboardsService {
     extra: Prisma.Sql = Prisma.empty,
   ): Prisma.Sql {
     return Prisma.sql`(
-      SELECT t.nombre_convenio, t.cups, SUM(t.cnt) AS n, COUNT(t.ym) AS meses
+      SELECT t.nombre_convenio, t.cups,
+             CAST(SUM(t.cnt) AS SIGNED) AS n, COUNT(t.ym) AS meses
       FROM (
-        SELECT ${this.convNt('c.nombre_convenio')} AS nombre_convenio, c.cups,
-               EXTRACT(YEAR_MONTH FROM c.fecha_cita) AS ym, COUNT(*) AS cnt
-        FROM costos c ${where}
-          AND c.cups IS NOT NULL AND c.nombre_convenio IS NOT NULL
-          ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()} ${extra}
-        GROUP BY ${this.convNt('c.nombre_convenio')}, c.cups, EXTRACT(YEAR_MONTH FROM c.fecha_cita)
+        SELECT a.convenio_nt AS nombre_convenio, a.cups,
+               EXTRACT(YEAR_MONTH FROM a.fecha_cita) AS ym, SUM(a.citas) AS cnt
+        FROM costos_agg a ${where}
+          AND a.cups IS NOT NULL AND a.convenio_nt IS NOT NULL
+          ${this.aggAsistencial()} ${this.aggSoloConsulta()} ${extra}
+        GROUP BY a.convenio_nt, a.cups, EXTRACT(YEAR_MONTH FROM a.fecha_cita)
       ) t
       GROUP BY t.nombre_convenio, t.cups
     )`;
@@ -72,9 +78,9 @@ export class DashboardsService {
    */
   private periodoMeses(where: Prisma.Sql): Prisma.Sql {
     return Prisma.sql`(
-      SELECT GREATEST(COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM c.fecha_cita)), 1)
-      FROM costos c ${where} AND c.fecha_cita IS NOT NULL
-        ${this.excluirAgendasNoAsistenciales()}
+      SELECT GREATEST(COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM a.fecha_cita)), 1)
+      FROM costos_agg a ${where} AND a.fecha_cita IS NOT NULL
+        ${this.aggAsistencial()}
     )`;
   }
 
@@ -92,9 +98,9 @@ export class DashboardsService {
              COALESCE(e.n, 0) AS n
       FROM ${ntMap} m
       JOIN (
-        SELECT DISTINCT ${this.convNt('c.nombre_convenio')} AS nombre_convenio
-        FROM costos c ${where} AND c.nombre_convenio IS NOT NULL
-          ${this.excluirAgendasNoAsistenciales()}
+        SELECT DISTINCT a.convenio_nt AS nombre_convenio
+        FROM costos_agg a ${where} AND a.convenio_nt IS NOT NULL
+          ${this.aggAsistencial()}
       ) cs ON cs.nombre_convenio = m.nombre_convenio
       LEFT JOIN ${this.ejecAgg(where)} e
         ON e.cups = m.cups AND e.nombre_convenio = m.nombre_convenio
@@ -119,9 +125,9 @@ export class DashboardsService {
    */
   private contratoMensual(where: Prisma.Sql): Prisma.Sql {
     const activos = Prisma.sql`(
-      SELECT DISTINCT ${this.convNt('c.nombre_convenio')}
-      FROM costos c ${where} AND c.nombre_convenio IS NOT NULL
-        ${this.excluirAgendasNoAsistenciales()}
+      SELECT DISTINCT a.convenio_nt
+      FROM costos_agg a ${where} AND a.convenio_nt IS NOT NULL
+        ${this.aggAsistencial()}
     )`;
     // Las dos variantes de nombre que rebuildNtMap() genera por fila de la NT.
     const sinSufijo = `CASE WHEN nt.convenio LIKE '% / SUBSIDIADO'
@@ -138,6 +144,272 @@ export class DashboardsService {
               AND ${this.convNt(comoSubsidiado)} IN ${activos})
         )
     )`;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  HELPERS SOBRE EL PRE-AGREGADO costos_agg (alias `a`)
+  // ═══════════════════════════════════════════════════════════════
+  //
+  // Equivalencias con las consultas sobre `costos` (alias `c`):
+  //
+  //   COUNT(*)                                  -> aggCitas()
+  //   SUM(estado_consulta='CUMPLIDA')           -> aggCumplidas()
+  //   SUM(estado IS NOT NULL AND <> CANCELADA)  -> aggConEstado()
+  //   SUM(valor_recuperacion)                   -> SUM(a.recuperacion)
+  //   AVG(diasHabiles(...))                     -> aggOportunidad()
+  //   ntConvenios (IN nt_map)                   -> aggSoloNt()
+  //   excluirAgendasNoAsistenciales()           -> aggAsistencial()
+  //   excluirCanceladas()                       -> aggExcluirCanceladas()
+  //
+  // El CAST a SIGNED no es cosmetico: SUM() sobre INT devuelve DECIMAL en
+  // MySQL, y COUNT(*) devuelve BIGINT. Sin el cast el JSON de respuesta puede
+  // cambiar de forma aunque el numero sea el mismo.
+  // El COALESCE tampoco: COUNT(*) sobre cero filas da 0, pero SUM() da NULL.
+
+  private aggCitas(): Prisma.Sql {
+    return Prisma.sql`CAST(COALESCE(SUM(a.citas), 0) AS SIGNED)`;
+  }
+
+  private aggCumplidas(): Prisma.Sql {
+    return Prisma.sql`CAST(COALESCE(SUM(a.cumplidas), 0) AS SIGNED)`;
+  }
+
+  private aggIncumplidas(): Prisma.Sql {
+    return Prisma.sql`CAST(COALESCE(SUM(a.incumplidas), 0) AS SIGNED)`;
+  }
+
+  /**
+   * Citas de un estado cualquiera. `estado_consulta` es una dimension del
+   * agregado, asi que contar un estado concreto es sumar `citas` de las filas
+   * que lo tienen — no hace falta una medida propia por cada estado.
+   */
+  private aggEstado(valor: string): Prisma.Sql {
+    return Prisma.sql`CAST(COALESCE(SUM(CASE WHEN a.estado_consulta = ${valor} THEN a.citas ELSE 0 END), 0) AS SIGNED)`;
+  }
+
+  /** Citas que entran al calculo de oportunidad (con ambas fechas y cita >= asignacion). */
+  private aggConOportunidad(): Prisma.Sql {
+    return Prisma.sql`CAST(COALESCE(SUM(a.dias_habiles_n), 0) AS SIGNED)`;
+  }
+
+  /** Citas con estado conocido y distinto de CANCELADA (denominador del cumplimiento). */
+  private aggConEstado(): Prisma.Sql {
+    return Prisma.sql`CAST(COALESCE(SUM(CASE WHEN a.estado_consulta IS NOT NULL AND a.estado_consulta <> 'CANCELADA' THEN a.citas ELSE 0 END), 0) AS SIGNED)`;
+  }
+
+  /** Promedio de dias habiles reconstruido: no se puede promediar un agregado. */
+  private aggOportunidad(): Prisma.Sql {
+    return Prisma.sql`SUM(a.dias_habiles_suma) / NULLIF(SUM(a.dias_habiles_n), 0)`;
+  }
+
+  private aggSoloNt(): Prisma.Sql {
+    return Prisma.sql`AND a.tiene_nt = 1`;
+  }
+
+  private aggAsistencial(): Prisma.Sql {
+    return Prisma.sql`AND a.agenda_no_asistencial = 0`;
+  }
+
+  private aggExcluirCanceladas(): Prisma.Sql {
+    return Prisma.sql`AND NOT (a.estado_consulta <=> 'CANCELADA')`;
+  }
+
+  /** Equivalente de soloConsulta() sobre el agregado (cups y funcionalidad son dimensiones). */
+  private aggSoloConsulta(): Prisma.Sql {
+    return Prisma.sql`AND NOT (LEFT(a.cups,4) IN ('8902','8903') AND (a.funcionalidad <> 'CONSULTA' OR a.funcionalidad IS NULL))`;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  ADMIN: reconstruir la tabla pre-agregada costos_agg
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Reconstruye `costos_agg`, el pre-agregado de `costos` que alimenta los
+   * dashboards. Llamar DESPUES de cada corrida del ETL (igual que
+   * rebuild-nt-map), porque `costos` se reconstruye entera en cada carga.
+   *
+   * POR QUE EXISTE: las consultas de dashboards son lentas no por falta de
+   * indices sino por row lookups. Un COUNT(*) filtrado por sede tarda ~290 ms
+   * (se resuelve con el indice), pero en cuanto la consulta toca una columna
+   * no indexada — `estado_consulta`, `nombre_convenio`, `nombre_medico` — hay
+   * que traer la fila completa de una tabla de 465 MB, medio millon de veces,
+   * y pasa a ~6 s. Se probaron indices de cobertura y solo dieron 1,0x-1,3x:
+   * `nombre_medico` y `nombre_convenio` son VARCHAR anchos y con prefijo el
+   * optimizador ni usa el indice.
+   *
+   * COMO LO RESUELVE: colapsa `costos` por las dimensiones de
+   * `buildCostosWhere` y resuelve UNA SOLA VEZ, aqui, los dos predicados
+   * caros que hoy se evaluan por fila en cada consulta:
+   *   - `agenda_no_asistencial` (el UPPER/TRIM sobre nombre_medico)
+   *   - `tiene_nt` (el IN contra nt_map)
+   * Medido: 1.123.132 filas -> ~226.000 (5x), 465 MB -> ~53 MB, y la misma
+   * consulta baja de 6.557 ms a 1.194 ms con resultados identicos.
+   *
+   * PROMEDIOS: la oportunidad no se puede promediar sobre un agregado, asi
+   * que se guardan `dias_habiles_suma` y `dias_habiles_n` y el AVG se
+   * reconstruye como SUM/SUM. Mismo criterio para cualquier promedio futuro.
+   */
+  async rebuildAgregado(): Promise<{ rows: number; segundos: number }> {
+    // Cerrojo en proceso: dos reconstrucciones simultaneas se destruyen entre
+    // si (la segunda borra la tabla mientras la primera la esta llenando, y el
+    // dashboard queda en cero). Pasa facil: el boton se remonta al cambiar de
+    // panel, hay varias pestanyas, o dos usuarios a la vez.
+    if (this.reconstruyendoAgg) {
+      throw new ConflictException(
+        'Ya hay una reconstruccion en curso. Espera a que termine.',
+      );
+    }
+    this.reconstruyendoAgg = true;
+    try {
+      return await this.construirAgregado();
+    } finally {
+      this.reconstruyendoAgg = false;
+    }
+  }
+
+  private reconstruyendoAgg = false;
+
+  /**
+   * Construye el agregado en una tabla aparte y la intercambia al final con
+   * RENAME TABLE, que en MySQL es atomico. Asi la tabla viva nunca se queda
+   * vacia ni a medio llenar: si algo falla, los dashboards siguen sirviendo la
+   * ultima version buena. Antes se hacia DROP + CREATE + INSERT sobre la tabla
+   * en uso, y un fallo a mitad de camino dejaba el dashboard en cero.
+   */
+  private async construirAgregado(): Promise<{
+    rows: number;
+    segundos: number;
+  }> {
+    const t0 = Date.now();
+    await this.prisma.$executeRawUnsafe('DROP TABLE IF EXISTS costos_agg_tmp');
+    await this.prisma.$executeRawUnsafe(`
+      CREATE TABLE costos_agg_tmp (
+        fecha_cita            DATE,
+        sede_grupo            VARCHAR(50),
+        nombre_sede           VARCHAR(150),
+        convenio_grupo        VARCHAR(50),
+        -- Se guardan los dos: nombre_convenio es el valor crudo que exponen
+        -- los selectores de /filtros, y convenio_nt el normalizado con convNt
+        -- (NUEVA EPS colapsado) que usa el cruce con la nota tecnica. Guardar
+        -- solo el segundo haria que los filtros dejaran de distinguir los
+        -- regimenes de NUEVA EPS. Cuesta 196 filas mas (+0,08%).
+        nombre_convenio       VARCHAR(300),
+        convenio_nt           VARCHAR(300),
+        modalidad             VARCHAR(50),
+        regimen_grupo         VARCHAR(20),
+        grupo_especialidad    VARCHAR(150),
+        especialidad          VARCHAR(500),
+        cups                  VARCHAR(20),
+        funcionalidad         VARCHAR(50),
+        tipo_agenda           VARCHAR(50),
+        pym                   VARCHAR(255),
+        estado_consulta       VARCHAR(50),
+        agenda_no_asistencial TINYINT NOT NULL DEFAULT 0,
+        tiene_nt              TINYINT NOT NULL DEFAULT 0,
+        citas                 INT     NOT NULL DEFAULT 0,
+        cumplidas             INT     NOT NULL DEFAULT 0,
+        incumplidas           INT     NOT NULL DEFAULT 0,
+        recuperacion          DECIMAL(18,2) NOT NULL DEFAULT 0,
+        dias_habiles_suma     BIGINT  NOT NULL DEFAULT 0,
+        dias_habiles_n        INT     NOT NULL DEFAULT 0,
+        KEY ix_agg_sede   (sede_grupo, agenda_no_asistencial, tiene_nt, convenio_grupo),
+        KEY ix_agg_fecha  (fecha_cita),
+        KEY ix_agg_cups   (cups, convenio_nt),
+        -- (fecha_cita, agenda_no_asistencial) es el par que filtran casi todas
+        -- las consultas. Sirve sobre todo a periodoMeses(), que va embebido en
+        -- contratadoScope y por eso se evalua muchas veces por request: baja de
+        -- ~640 ms a ~38 ms (17x). Se probo tambien una version ancha que
+        -- incluia tiene_nt, cups y citas: ganaba solo 1,2x en el resto y
+        -- tardaba 382 s en construirse, asi que se descarto. Esta tarda 1 s.
+        KEY ix_agg_fecha_asist (fecha_cita, agenda_no_asistencial)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // El GROUP BY repite las expresiones en vez de usar el alias: MySQL lo
+    // permite por alias, pero repetirlas deja explicito que la fila del
+    // agregado es exactamente esa combinacion de dimensiones.
+    const convNt = `(CASE WHEN c.nombre_convenio LIKE 'NUEVA EPS%' THEN 'NUEVA EPS' ELSE c.nombre_convenio END)`;
+    const noAsist = `(UPPER(TRIM(COALESCE(c.nombre_medico,''))) = 'TOMA DE MUESTRAS NUEVA EPS CUCUTA')`;
+    // `tiene_nt` NO puede ir como expresion en el GROUP BY: con only_full_group_by
+    // MySQL rechaza (error 1055) cualquier expresion que contenga una subconsulta,
+    // porque no puede probar la dependencia funcional. Se resuelve con un LEFT JOIN
+    // al conjunto de convenios con NT y un MAX(): dentro de cada grupo todas las
+    // filas comparten `convenio_nt`, asi que el MAX es el valor correcto del flag.
+    const ntConvenios = `(
+      SELECT DISTINCT (CASE WHEN nombre_convenio LIKE 'NUEVA EPS%' THEN 'NUEVA EPS' ELSE nombre_convenio END) AS conv
+      FROM nt_map
+    )`;
+    const dias = `(
+      DATEDIFF(c.fecha_cita, c.fecha_asig)
+      - FLOOR((DATEDIFF(c.fecha_cita, c.fecha_asig) + DAYOFWEEK(c.fecha_asig) - 1) / 7)
+      - (SELECT COUNT(*) FROM festivos f
+         WHERE f.dia > c.fecha_asig AND f.dia <= c.fecha_cita AND DAYOFWEEK(f.dia) <> 1)
+    )`;
+    // La oportunidad solo aplica a citas con ambas fechas y fecha_cita >= fecha_asig,
+    // mismas condiciones que usa getResumen al calcularla sobre costos.
+    const aplicaDias = `(c.fecha_asig IS NOT NULL AND c.fecha_cita IS NOT NULL AND c.fecha_cita >= c.fecha_asig)`;
+
+    await this.prisma.$executeRawUnsafe(`
+      INSERT INTO costos_agg_tmp
+      SELECT
+        c.fecha_cita, c.sede_grupo, c.nombre_sede, c.convenio_grupo,
+        c.nombre_convenio, ${convNt}, c.modalidad, c.regimen_grupo,
+        c.grupo_especialidad, c.especialidad, c.cups, c.funcionalidad,
+        c.tipo_agenda, c.pym, c.estado_consulta,
+        ${noAsist},
+        MAX(ntc.conv IS NOT NULL),
+        COUNT(*),
+        -- COALESCE obligatorio: hay grupos con estado_consulta NULL (las filas
+        -- de LAB y ODONTO que el ETL carga aparte), y SUM sobre valores todos
+        -- NULL devuelve NULL, no 0. Las columnas son NOT NULL.
+        COALESCE(SUM(c.estado_consulta = 'CUMPLIDA'), 0),
+        COALESCE(SUM(c.estado_consulta = 'INCUMPLIDA'), 0),
+        COALESCE(SUM(COALESCE(c.valor_recuperacion, 0)), 0),
+        COALESCE(SUM(CASE WHEN ${aplicaDias} THEN ${dias} ELSE 0 END), 0),
+        COALESCE(SUM(${aplicaDias}), 0)
+      FROM costos c
+      LEFT JOIN ${ntConvenios} ntc ON ntc.conv = ${convNt}
+      GROUP BY
+        c.fecha_cita, c.sede_grupo, c.nombre_sede, c.convenio_grupo,
+        c.nombre_convenio, ${convNt}, c.modalidad, c.regimen_grupo,
+        c.grupo_especialidad, c.especialidad, c.cups, c.funcionalidad,
+        c.tipo_agenda, c.pym, c.estado_consulta, ${noAsist}
+    `);
+
+    // Se cuenta ANTES de publicar: si la nueva version salio vacia, algo fallo
+    // en silencio y es mejor no reemplazar la tabla buena por una vacia.
+    const result = await this.prisma.$queryRaw<Array<{ n: bigint }>>(
+      Prisma.sql`SELECT COUNT(*) AS n FROM costos_agg_tmp`,
+    );
+    const rows = Number(result[0]?.n ?? 0);
+    if (rows === 0) {
+      await this.prisma.$executeRawUnsafe('DROP TABLE IF EXISTS costos_agg_tmp');
+      throw new InternalServerErrorException(
+        'La reconstruccion produjo 0 filas; se conserva la version anterior.',
+      );
+    }
+
+    // Publicacion atomica. RENAME TABLE con varias tablas es atomico en MySQL:
+    // no hay instante en que `costos_agg` no exista para quien este leyendo.
+    const existe = await this.prisma.$queryRaw<Array<{ n: bigint }>>(
+      Prisma.sql`SELECT COUNT(*) AS n FROM information_schema.tables
+                 WHERE table_schema = DATABASE() AND table_name = 'costos_agg'`,
+    );
+    await this.prisma.$executeRawUnsafe('DROP TABLE IF EXISTS costos_agg_old');
+    if (Number(existe[0]?.n ?? 0) > 0) {
+      await this.prisma.$executeRawUnsafe(
+        'RENAME TABLE costos_agg TO costos_agg_old, costos_agg_tmp TO costos_agg',
+      );
+      await this.prisma.$executeRawUnsafe('DROP TABLE IF EXISTS costos_agg_old');
+    } else {
+      await this.prisma.$executeRawUnsafe(
+        'RENAME TABLE costos_agg_tmp TO costos_agg',
+      );
+    }
+
+    const segundos = Math.round((Date.now() - t0) / 100) / 10;
+    this.logger.log(`costos_agg reconstruida: ${rows} filas en ${segundos}s`);
+    return { rows, segundos };
   }
 
   /**
@@ -199,17 +471,17 @@ export class DashboardsService {
   // ═══════════════════════════════════════════════════════════════
 
   async getResumen(filters: DashboardFiltersDto) {
-    const { whereSql } = buildCostosWhere(filters);
+    // Lee del pre-agregado costos_agg, no de costos. Ver rebuildAgregado().
+    const { whereSql } = buildAggWhere(filters);
 
     // Solo los convenios con nota tecnica entran al ANALISIS de cumplimiento.
     // Los de evento (sin NT) se ven en los datos de volumen, pero su tasa de
     // cita cumplida/incumplida no aplica (el evento ejecutado es 100%; las no
     // ejecutadas son inasistencias del usuario, no incumplimiento de la IPS).
-    // Se filtra a nivel de cita (nombre_convenio en nt_map): asi un mismo grupo
-    // comercial cuenta solo en las sedes donde su contrato tiene NT (p.ej.
-    // COMPENSAR CUCUTA EVENTO no entra, pero COMPENSAR CAJICA PGP si).
-    const ntConvenios = Prisma.sql`
-      AND ${this.convNt('c.nombre_convenio')} IN (SELECT DISTINCT ${this.convNt('nombre_convenio')} FROM nt_map)`;
+    // El cruce con nt_map ya viene resuelto en la columna `tiene_nt`: asi un
+    // mismo grupo comercial cuenta solo en las sedes donde su contrato tiene NT
+    // (p.ej. COMPENSAR CUCUTA EVENTO no entra, pero COMPENSAR CAJICA PGP si).
+    const ntConvenios = this.aggSoloNt();
 
     const [
       meta,
@@ -226,8 +498,9 @@ export class DashboardsService {
         Array<{ total: bigint; desde: Date | null; hasta: Date | null }>
       >(
         Prisma.sql`
-            SELECT COUNT(*) AS total, MIN(fecha_cita) AS desde, MAX(fecha_cita) AS hasta
-            FROM costos c ${whereSql}
+            SELECT ${this.aggCitas()} AS total,
+                   MIN(a.fecha_cita) AS desde, MAX(a.fecha_cita) AS hasta
+            FROM costos_agg a ${whereSql}
           `,
       ),
       this.prisma.$queryRaw<
@@ -235,57 +508,56 @@ export class DashboardsService {
       >(
         Prisma.sql`
             SELECT
-              ROUND(100 * SUM(estado_consulta='CUMPLIDA') / NULLIF(SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA'),0), 1) AS pct,
-              SUM(estado_consulta='CUMPLIDA') AS cumplidas,
-              SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA') AS con_estado
-            FROM costos c ${whereSql} ${ntConvenios}
-              ${this.excluirAgendasNoAsistenciales()}
+              ROUND(100 * ${this.aggCumplidas()} / NULLIF(${this.aggConEstado()},0), 1) AS pct,
+              ${this.aggCumplidas()} AS cumplidas,
+              ${this.aggConEstado()} AS con_estado
+            FROM costos_agg a ${whereSql} ${ntConvenios}
+              ${this.aggAsistencial()}
           `,
       ),
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
-        Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,
+        Prisma.sql`SELECT ROUND(SUM(a.recuperacion)/1e6,1) AS millones FROM costos_agg a ${whereSql}`,
       ),
       this.prisma.$queryRaw<Array<{ n: bigint }>>(
         Prisma.sql`
             SELECT COUNT(*) AS n FROM (
-              SELECT convenio_grupo,
-                     100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA'),0) AS pct,
-                     COUNT(*) AS citas
-              FROM costos c ${whereSql}
-                AND convenio_grupo IS NOT NULL ${ntConvenios}
-                ${this.excluirAgendasNoAsistenciales()}
-              GROUP BY convenio_grupo
+              SELECT a.convenio_grupo,
+                     100*${this.aggCumplidas()}/NULLIF(${this.aggConEstado()},0) AS pct,
+                     ${this.aggCitas()} AS citas
+              FROM costos_agg a ${whereSql}
+                AND a.convenio_grupo IS NOT NULL ${ntConvenios}
+                ${this.aggAsistencial()}
+              GROUP BY a.convenio_grupo
               HAVING citas > 100 AND pct < 90
             ) t
           `,
       ),
       this.prisma.$queryRaw<Array<{ dias: number | null }>>(
         Prisma.sql`
-            SELECT ROUND(AVG(${this.diasHabiles('c.fecha_asig', 'c.fecha_cita')}),1) AS dias
-            FROM costos c ${whereSql}
-              AND c.fecha_asig IS NOT NULL AND c.fecha_cita >= c.fecha_asig
-              ${this.excluirCanceladas()}
+            SELECT ROUND(${this.aggOportunidad()},1) AS dias
+            FROM costos_agg a ${whereSql}
+              ${this.aggExcluirCanceladas()}
           `,
       ),
       this.prisma.$queryRaw<
         Array<{ mes: string; citas: bigint; cumplidas: bigint }>
       >(
         Prisma.sql`
-            SELECT DATE_FORMAT(fecha_cita,'%Y-%m') AS mes,
-                   COUNT(*) AS citas,
-                   SUM(estado_consulta='CUMPLIDA') AS cumplidas
-            FROM costos c ${whereSql}
-              AND fecha_cita IS NOT NULL
-              ${this.excluirAgendasNoAsistenciales()}
-              ${this.excluirCanceladas()}
+            SELECT DATE_FORMAT(a.fecha_cita,'%Y-%m') AS mes,
+                   ${this.aggCitas()} AS citas,
+                   ${this.aggCumplidas()} AS cumplidas
+            FROM costos_agg a ${whereSql}
+              AND a.fecha_cita IS NOT NULL
+              ${this.aggAsistencial()}
+              ${this.aggExcluirCanceladas()}
             GROUP BY mes ORDER BY mes
           `,
       ),
       this.prisma.$queryRaw<Array<{ tipo: string; n: bigint }>>(
         Prisma.sql`
-            SELECT COALESCE(funcionalidad,'NO DEFINIDO') AS tipo, COUNT(*) AS n
-            FROM costos c ${whereSql}
-              ${this.excluirCanceladas()}
+            SELECT COALESCE(a.funcionalidad,'NO DEFINIDO') AS tipo, ${this.aggCitas()} AS n
+            FROM costos_agg a ${whereSql}
+              ${this.aggExcluirCanceladas()}
             GROUP BY tipo ORDER BY n DESC
           `,
       ),
@@ -293,23 +565,23 @@ export class DashboardsService {
         Array<{ convenio_grupo: string; citas: bigint; pct: number | null }>
       >(
         Prisma.sql`
-            SELECT convenio_grupo,
-                   SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA') AS citas,
-                   ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL AND estado_consulta <> 'CANCELADA'),0),1) AS pct
-            FROM costos c ${whereSql}
-              AND convenio_grupo IS NOT NULL ${ntConvenios}
-              ${this.excluirAgendasNoAsistenciales()}
-            GROUP BY convenio_grupo
+            SELECT a.convenio_grupo,
+                   ${this.aggConEstado()} AS citas,
+                   ROUND(100*${this.aggCumplidas()}/NULLIF(${this.aggConEstado()},0),1) AS pct
+            FROM costos_agg a ${whereSql}
+              AND a.convenio_grupo IS NOT NULL ${ntConvenios}
+              ${this.aggAsistencial()}
+            GROUP BY a.convenio_grupo
             ORDER BY pct DESC, citas DESC
           `,
       ),
       this.prisma.$queryRaw<Array<{ sede_grupo: string; citas: bigint }>>(
         Prisma.sql`
-            SELECT sede_grupo, COUNT(*) AS citas
-            FROM costos c ${whereSql}
-              AND sede_grupo IS NOT NULL
-              ${this.excluirCanceladas()}
-            GROUP BY sede_grupo ORDER BY citas DESC
+            SELECT a.sede_grupo, ${this.aggCitas()} AS citas
+            FROM costos_agg a ${whereSql}
+              AND a.sede_grupo IS NOT NULL
+              ${this.aggExcluirCanceladas()}
+            GROUP BY a.sede_grupo ORDER BY citas DESC
           `,
       ),
     ]);
@@ -336,7 +608,7 @@ export class DashboardsService {
   // ═══════════════════════════════════════════════════════════════
 
   async getEjecucionNt(filters: DashboardFiltersDto) {
-    const { whereSql } = buildCostosWhere(filters);
+    const { whereSql } = buildAggWhere(filters);
     // Meta a nivel ciudad: misma base pero ignorando la sede fisica. Asi, al
     // seleccionar una sede, el KPI muestra su aporte respecto a la ciudad
     // (ejecutado_sede / meta_ciudad). Sin sede seleccionada whereMetaSql == whereSql.
@@ -390,11 +662,11 @@ export class DashboardsService {
                 JOIN ${ntMap} m ON m.cups = e.cups AND m.nombre_convenio = e.nombre_convenio
               ) city
               JOIN (
-                SELECT ${this.convNt('c.nombre_convenio')} AS nombre_convenio, c.cups, COUNT(*) AS ejec_sede
-                FROM costos c ${whereSql}
-                  AND c.cups IS NOT NULL AND c.nombre_convenio IS NOT NULL
-                  ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()}
-                GROUP BY ${this.convNt('c.nombre_convenio')}, c.cups
+                SELECT a.convenio_nt AS nombre_convenio, a.cups, ${this.aggCitas()} AS ejec_sede
+                FROM costos_agg a ${whereSql}
+                  AND a.cups IS NOT NULL AND a.convenio_nt IS NOT NULL
+                  ${this.aggAsistencial()} ${this.aggSoloConsulta()}
+                GROUP BY a.convenio_nt, a.cups
               ) s ON s.cups = city.cups AND s.nombre_convenio = city.nombre_convenio
             ) num
             CROSS JOIN
@@ -435,15 +707,15 @@ export class DashboardsService {
       >(
         Prisma.sql`
           WITH top_cups AS (
-            SELECT c.cups
-            FROM costos c
-            JOIN ${ntMap} m ON m.cups = c.cups AND m.nombre_convenio = ${this.convNt('c.nombre_convenio')}
-            ${whereSql} ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()}
-            GROUP BY c.cups
-            ORDER BY COUNT(*) DESC
+            SELECT a.cups
+            FROM costos_agg a
+            JOIN ${ntMap} m ON m.cups = a.cups AND m.nombre_convenio = a.convenio_nt
+            ${whereSql} ${this.aggAsistencial()} ${this.aggSoloConsulta()}
+            GROUP BY a.cups
+            ORDER BY ${this.aggCitas()} DESC, a.cups
             LIMIT 8
           ),
-          ejec AS ${this.ejecAgg(whereSql, Prisma.sql`AND c.cups IN (SELECT cups FROM top_cups)`)},
+          ejec AS ${this.ejecAgg(whereSql, Prisma.sql`AND a.cups IN (SELECT cups FROM top_cups)`)},
           conv AS (
             SELECT DISTINCT nombre_convenio FROM ejec
           )
@@ -488,7 +760,11 @@ export class DashboardsService {
           WHERE m.meta_mes > 100
             AND m.nombre_convenio IN (SELECT nombre_convenio FROM conv)
           HAVING pct IS NOT NULL AND (pct < 80 OR pct > 120)
-          ORDER BY ABS(pct - 100) DESC LIMIT 8
+          -- Desempate explicito: hay muchisimas filas con pct = 0, que empatan
+          -- todas en ABS(pct-100) = 100. Sin criterio adicional el LIMIT 8
+          -- elegia 8 cualesquiera segun el orden fisico de lectura, asi que la
+          -- lista cambiaba sola entre recargas o tras recargar la tabla.
+          ORDER BY ABS(pct - 100) DESC, meta DESC, convenio, m.cups LIMIT 8
         `,
       ),
       this.prisma.$queryRaw<
@@ -506,11 +782,11 @@ export class DashboardsService {
             FROM nt_map GROUP BY ${this.convNt('nombre_convenio')}
           ),
           ejec AS (
-            SELECT ${this.convNt('c.nombre_convenio')} AS nombre_convenio, DATE_FORMAT(c.fecha_cita,'%Y-%m') AS mes, COUNT(*) AS n
-            FROM costos c ${whereSql}
-              AND c.fecha_cita IS NOT NULL AND c.nombre_convenio IS NOT NULL
-              ${this.excluirAgendasNoAsistenciales()} ${this.soloConsulta()}
-            GROUP BY ${this.convNt('c.nombre_convenio')}, mes
+            SELECT a.convenio_nt AS nombre_convenio, DATE_FORMAT(a.fecha_cita,'%Y-%m') AS mes, ${this.aggCitas()} AS n
+            FROM costos_agg a ${whereSql}
+              AND a.fecha_cita IS NOT NULL AND a.convenio_nt IS NOT NULL
+              ${this.aggAsistencial()} ${this.aggSoloConsulta()}
+            GROUP BY a.convenio_nt, mes
           )
           SELECT
             e.nombre_convenio AS convenio,
@@ -561,14 +837,14 @@ export class DashboardsService {
         Prisma.sql`
           WITH ejec AS ${this.ejecAgg(whereSql)},
           periodo AS (
-            SELECT GREATEST(COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM c.fecha_cita)), 1) AS meses
-            FROM costos c ${whereSql} AND c.fecha_cita IS NOT NULL
-              ${this.excluirAgendasNoAsistenciales()}
+            SELECT GREATEST(COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM a.fecha_cita)), 1) AS meses
+            FROM costos_agg a ${whereSql} AND a.fecha_cita IS NOT NULL
+              ${this.aggAsistencial()}
           ),
           conv_scope AS (
-            SELECT DISTINCT ${this.convNt('c.nombre_convenio')} AS nombre_convenio
-            FROM costos c ${whereSql} AND c.nombre_convenio IS NOT NULL
-              ${this.excluirAgendasNoAsistenciales()}
+            SELECT DISTINCT a.convenio_nt AS nombre_convenio
+            FROM costos_agg a ${whereSql} AND a.convenio_nt IS NOT NULL
+              ${this.aggAsistencial()}
           )
           SELECT
             m.cups,
@@ -589,14 +865,21 @@ export class DashboardsService {
       >(
         Prisma.sql`
           SELECT
-            c.cups,
-            (SELECT LEFT(descripcion,90) FROM cat_cups cc WHERE cc.codigo = c.cups LIMIT 1) AS descripcion,
-            COUNT(*) AS ejecutado
-          FROM costos c ${whereSql}
-            AND c.cups IS NOT NULL
-            AND c.cups NOT IN (SELECT cups FROM nt_map WHERE meta_mes > 0)
-            ${this.excluirAgendasNoAsistenciales()}
-          GROUP BY c.cups
+            a.cups,
+            (SELECT LEFT(descripcion,90) FROM cat_cups cc WHERE cc.codigo = a.cups LIMIT 1) AS descripcion,
+            ${this.aggCitas()} AS ejecutado
+          -- Anti-join en vez de NOT IN (subconsulta): con NOT IN el optimizador
+          -- no puede usar indices y termina examinando las 234k filas del
+          -- agregado. Con LEFT JOIN ... IS NULL da el mismo resultado (54 filas,
+          -- verificado) en 586 ms contra 1.637 ms: 2,8x.
+          FROM costos_agg a
+          LEFT JOIN (SELECT DISTINCT cups FROM nt_map WHERE meta_mes > 0) nm
+            ON nm.cups = a.cups
+          ${whereSql}
+            AND a.cups IS NOT NULL
+            AND nm.cups IS NULL
+            ${this.aggAsistencial()}
+          GROUP BY a.cups
           ORDER BY ejecutado DESC
         `,
       ),
@@ -618,7 +901,7 @@ export class DashboardsService {
   // ═══════════════════════════════════════════════════════════════
 
   async getFinanciero(filters: DashboardFiltersDto) {
-    const { whereSql } = buildCostosWhere(filters);
+    const { whereSql } = buildAggWhere(filters);
     // nt_map colapsado por (cups, convenio): un costo_medio por par (promedio de
     // los grupos etarios). Evita que el JOIN multiplique el costo y el conteo de
     // citas costeadas (mismo motivo que en ejecucion-nt), sin tocar nt_map.
@@ -641,12 +924,14 @@ export class DashboardsService {
       >(
         Prisma.sql`
             SELECT
-              ROUND(SUM(m.costo_medio)/1e6, 1) AS millones,
-              COUNT(*) AS citas_costeadas
-            FROM costos c
-            JOIN ${ntMapCosto} m ON m.cups = c.cups AND m.nombre_convenio = ${this.convNt('c.nombre_convenio')}
+              -- Cada fila del agregado representa \`citas\` citas, no una: el
+              -- costo va multiplicado, no sumado una sola vez.
+              ROUND(SUM(m.costo_medio * a.citas)/1e6, 1) AS millones,
+              ${this.aggCitas()} AS citas_costeadas
+            FROM costos_agg a
+            JOIN ${ntMapCosto} m ON m.cups = a.cups AND m.nombre_convenio = a.convenio_nt
             ${whereSql}
-              ${this.excluirCanceladas()}
+              ${this.aggExcluirCanceladas()}
           `,
       ),
       // Costo esperado NT = contrato mensual x meses del periodo, ambos bajo el
@@ -662,7 +947,7 @@ export class DashboardsService {
           `,
       ),
       this.prisma.$queryRaw<Array<{ millones: number | null }>>(
-        Prisma.sql`SELECT ROUND(SUM(valor_recuperacion)/1e6,1) AS millones FROM costos c ${whereSql}`,
+        Prisma.sql`SELECT ROUND(SUM(a.recuperacion)/1e6,1) AS millones FROM costos_agg a ${whereSql}`,
       ),
       this.prisma.$queryRaw<
         Array<{
@@ -673,15 +958,15 @@ export class DashboardsService {
         }>
       >(
         Prisma.sql`
-            SELECT c.cups,
-                   (SELECT LEFT(descripcion,50) FROM notas_tecnicas nt WHERE nt.cups=c.cups LIMIT 1) AS descripcion,
-                   COUNT(*) AS n,
-                   ROUND(SUM(m.costo_medio)/1e6, 1) AS millones
-            FROM costos c
-            JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
+            SELECT a.cups,
+                   (SELECT LEFT(descripcion,50) FROM notas_tecnicas nt WHERE nt.cups=a.cups LIMIT 1) AS descripcion,
+                   ${this.aggCitas()} AS n,
+                   ROUND(SUM(m.costo_medio * a.citas)/1e6, 1) AS millones
+            FROM costos_agg a
+            JOIN ${ntMapCosto} m ON m.cups=a.cups AND m.nombre_convenio=a.convenio_nt
             ${whereSql}
-              ${this.excluirCanceladas()}
-            GROUP BY c.cups
+              ${this.aggExcluirCanceladas()}
+            GROUP BY a.cups
             ORDER BY millones DESC
           `,
       ),
@@ -690,11 +975,11 @@ export class DashboardsService {
       >(
         Prisma.sql`
             WITH costo_cups AS (
-              SELECT c.cups, SUM(m.costo_medio) AS costo
-              FROM costos c JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
+              SELECT a.cups, SUM(m.costo_medio * a.citas) AS costo
+              FROM costos_agg a JOIN ${ntMapCosto} m ON m.cups=a.cups AND m.nombre_convenio=a.convenio_nt
               ${whereSql}
-              ${this.excluirCanceladas()}
-              GROUP BY c.cups
+              ${this.aggExcluirCanceladas()}
+              GROUP BY a.cups
             )
             SELECT
               (SELECT SUM(costo) FROM (SELECT costo FROM costo_cups ORDER BY costo DESC LIMIT 20) t) AS top20,
@@ -709,15 +994,15 @@ export class DashboardsService {
         }>
       >(
         Prisma.sql`
-            SELECT c.convenio_grupo,
-                   COUNT(*) AS citas,
-                   ROUND(SUM(m.costo_medio)/1e6, 1) AS millones
-            FROM costos c
-            JOIN ${ntMapCosto} m ON m.cups=c.cups AND m.nombre_convenio=${this.convNt('c.nombre_convenio')}
+            SELECT a.convenio_grupo,
+                   ${this.aggCitas()} AS citas,
+                   ROUND(SUM(m.costo_medio * a.citas)/1e6, 1) AS millones
+            FROM costos_agg a
+            JOIN ${ntMapCosto} m ON m.cups=a.cups AND m.nombre_convenio=a.convenio_nt
             ${whereSql}
-              AND c.convenio_grupo IS NOT NULL
-              ${this.excluirCanceladas()}
-            GROUP BY c.convenio_grupo
+              AND a.convenio_grupo IS NOT NULL
+              ${this.aggExcluirCanceladas()}
+            GROUP BY a.convenio_grupo
             ORDER BY millones DESC
           `,
       ),
@@ -725,11 +1010,20 @@ export class DashboardsService {
         Array<{ convenio_grupo: string; millones: number | null }>
       >(
         Prisma.sql`
-            SELECT convenio_grupo,
-                   ROUND(SUM(valor_recuperacion)/1e6,1) AS millones
-            FROM costos c ${whereSql}
-              AND convenio_grupo IS NOT NULL AND valor_recuperacion > 0
-            GROUP BY convenio_grupo
+            SELECT a.convenio_grupo,
+                   ROUND(SUM(a.recuperacion)/1e6,1) AS millones
+            FROM costos_agg a ${whereSql}
+              AND a.convenio_grupo IS NOT NULL
+            GROUP BY a.convenio_grupo
+            -- El original filtraba fila a fila con \`valor_recuperacion > 0\`, que
+            -- el agregado no puede reproducir porque ya viene sumado. Equivale a
+            -- este HAVING: no hay valores negativos en la columna (verificado:
+            -- 0 negativos, y SUM total == SUM de solo positivos), asi que un
+            -- grupo con alguna fila positiva es exactamente un grupo con suma > 0.
+            -- OJO: la condicion va sobre la suma CRUDA, no sobre \`millones\`. Un
+            -- convenio con recuperacion pequenya redondea a 0.0 millones y el
+            -- original si lo devolvia; filtrar por el redondeo lo hacia desaparecer.
+            HAVING SUM(a.recuperacion) > 0
             ORDER BY millones DESC
           `,
       ),
@@ -777,15 +1071,15 @@ export class DashboardsService {
   // ═══════════════════════════════════════════════════════════════
 
   async getCalidad(filters: DashboardFiltersDto) {
-    const { whereSql } = buildCostosWhere(filters);
+    // Lee del pre-agregado costos_agg, no de costos. Ver rebuildAgregado().
+    const { whereSql } = buildAggWhere(filters);
 
     // La inasistencia/incumplimiento por convenio es una metrica de cumplimiento
     // de la IPS: los convenios de evento (sin NT) no aplican (su no-ejecucion es
     // inasistencia del usuario, no incumplimiento de la IPS). Se filtra a nivel
     // de cita igual que en Resumen, para que p.ej. COMPENSAR CUCUTA EVENTO no
     // aparezca pero COMPENSAR CAJICA PGP si.
-    const ntConvenios = Prisma.sql`
-      AND ${this.convNt('c.nombre_convenio')} IN (SELECT DISTINCT ${this.convNt('nombre_convenio')} FROM nt_map)`;
+    const ntConvenios = this.aggSoloNt();
 
     const [oportunidad, estadoSede, inasistencia, mixAgenda] =
       await Promise.all([
@@ -793,14 +1087,14 @@ export class DashboardsService {
           Array<{ especialidad: string; n: bigint; dias: number | null }>
         >(
           Prisma.sql`
-          SELECT especialidad,
-                 COUNT(*) AS n,
-                 ROUND(AVG(${this.diasHabiles('c.fecha_asig', 'c.fecha_cita')}),1) AS dias
-          FROM costos c ${whereSql}
-            AND c.fecha_asig IS NOT NULL AND c.fecha_cita >= c.fecha_asig
-            AND especialidad IS NOT NULL AND especialidad <> ''
-            ${this.excluirCanceladas()}
-          GROUP BY especialidad
+          SELECT a.especialidad,
+                 ${this.aggConOportunidad()} AS n,
+                 ROUND(${this.aggOportunidad()},1) AS dias
+          FROM costos_agg a ${whereSql}
+            AND a.especialidad IS NOT NULL AND a.especialidad <> ''
+            ${this.aggExcluirCanceladas()}
+          GROUP BY a.especialidad
+          HAVING n > 0
           ORDER BY n DESC
         `,
         ),
@@ -814,15 +1108,15 @@ export class DashboardsService {
           }>
         >(
           Prisma.sql`
-          SELECT sede_grupo,
-                 COUNT(*) AS total,
-                 ROUND(100*SUM(estado_consulta='CUMPLIDA')/COUNT(*),1) AS pct_cump,
-                 ROUND(100*SUM(estado_consulta='INCUMPLIDA')/COUNT(*),1) AS pct_incump,
-                 ROUND(100*SUM(estado_consulta='CANCELADA')/COUNT(*),1) AS pct_canc
-          FROM costos c ${whereSql}
-            AND sede_grupo IS NOT NULL AND estado_consulta IS NOT NULL
-            ${this.excluirAgendasNoAsistenciales()}
-          GROUP BY sede_grupo
+          SELECT a.sede_grupo,
+                 ${this.aggCitas()} AS total,
+                 ROUND(100*${this.aggCumplidas()}/${this.aggCitas()},1) AS pct_cump,
+                 ROUND(100*${this.aggIncumplidas()}/${this.aggCitas()},1) AS pct_incump,
+                 ROUND(100*${this.aggEstado('CANCELADA')}/${this.aggCitas()},1) AS pct_canc
+          FROM costos_agg a ${whereSql}
+            AND a.sede_grupo IS NOT NULL AND a.estado_consulta IS NOT NULL
+            ${this.aggAsistencial()}
+          GROUP BY a.sede_grupo
           ORDER BY total DESC
         `,
         ),
@@ -830,27 +1124,27 @@ export class DashboardsService {
           Array<{ convenio_grupo: string; mes: string; pct: number | null }>
         >(
           Prisma.sql`
-          SELECT convenio_grupo, DATE_FORMAT(fecha_cita,'%Y-%m') AS mes,
-                 ROUND(100*SUM(estado_consulta='INCUMPLIDA')/NULLIF(COUNT(*),0),1) AS pct
-          FROM costos c ${whereSql} ${ntConvenios}
-            AND convenio_grupo IS NOT NULL
-            AND fecha_cita IS NOT NULL
-            ${this.excluirAgendasNoAsistenciales()}
-            ${this.excluirCanceladas()}
-          GROUP BY convenio_grupo, mes
-          ORDER BY convenio_grupo, mes
+          SELECT a.convenio_grupo, DATE_FORMAT(a.fecha_cita,'%Y-%m') AS mes,
+                 ROUND(100*${this.aggIncumplidas()}/NULLIF(${this.aggCitas()},0),1) AS pct
+          FROM costos_agg a ${whereSql} ${ntConvenios}
+            AND a.convenio_grupo IS NOT NULL
+            AND a.fecha_cita IS NOT NULL
+            ${this.aggAsistencial()}
+            ${this.aggExcluirCanceladas()}
+          GROUP BY a.convenio_grupo, mes
+          ORDER BY a.convenio_grupo, mes
         `,
         ),
         this.prisma.$queryRaw<
           Array<{ sede_grupo: string; tipo_agenda: string; n: bigint }>
         >(
           Prisma.sql`
-          SELECT sede_grupo, tipo_agenda, COUNT(*) AS n
-          FROM costos c ${whereSql}
-            AND sede_grupo IS NOT NULL
-            AND tipo_agenda IS NOT NULL
-            ${this.excluirCanceladas()}
-          GROUP BY sede_grupo, tipo_agenda
+          SELECT a.sede_grupo, a.tipo_agenda, ${this.aggCitas()} AS n
+          FROM costos_agg a ${whereSql}
+            AND a.sede_grupo IS NOT NULL
+            AND a.tipo_agenda IS NOT NULL
+            ${this.aggExcluirCanceladas()}
+          GROUP BY a.sede_grupo, a.tipo_agenda
         `,
         ),
       ]);
@@ -868,36 +1162,42 @@ export class DashboardsService {
   // ═══════════════════════════════════════════════════════════════
 
   async getPym(filters: DashboardFiltersDto) {
-    const { whereSql } = buildCostosWhere(filters);
+    // Lee del pre-agregado costos_agg, no de costos. Ver rebuildAgregado().
+    // Nota: el denominador original es `SUM(estado_consulta IS NOT NULL)`, que
+    // aqui equivale a aggConEstado() porque las canceladas ya salieron por el
+    // WHERE; el `<> CANCELADA` del helper queda redundante pero inocuo.
+    const { whereSql } = buildAggWhere(filters);
 
     const [topProgramas, alertas] = await Promise.all([
       this.prisma.$queryRaw<
         Array<{ pym: string; n: bigint; pct_cump: number | null }>
       >(
         Prisma.sql`
-          SELECT pym, COUNT(*) AS n,
-                 ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct_cump
-          FROM costos c ${whereSql}
-            AND pym IS NOT NULL AND pym <> ''
-            ${this.excluirAgendasNoAsistenciales()}
-            ${this.excluirCanceladas()}
-          GROUP BY pym ORDER BY n DESC
+          SELECT a.pym, ${this.aggCitas()} AS n,
+                 ROUND(100*${this.aggCumplidas()}/NULLIF(${this.aggConEstado()},0),1) AS pct_cump
+          FROM costos_agg a ${whereSql}
+            AND a.pym IS NOT NULL AND a.pym <> ''
+            ${this.aggAsistencial()}
+            ${this.aggExcluirCanceladas()}
+          GROUP BY a.pym ORDER BY n DESC
         `,
       ),
       this.prisma.$queryRaw<
         Array<{ cohorte: string; poblacion: bigint; pct_cump: number | null }>
       >(
         Prisma.sql`
-          SELECT pym AS cohorte,
-                 COUNT(*) AS poblacion,
-                 ROUND(100*SUM(estado_consulta='CUMPLIDA')/NULLIF(SUM(estado_consulta IS NOT NULL),0),1) AS pct_cump
-          FROM costos c ${whereSql}
-            AND pym IS NOT NULL AND pym <> ''
-            ${this.excluirAgendasNoAsistenciales()}
-            ${this.excluirCanceladas()}
-          GROUP BY pym
+          SELECT a.pym AS cohorte,
+                 ${this.aggCitas()} AS poblacion,
+                 ROUND(100*${this.aggCumplidas()}/NULLIF(${this.aggConEstado()},0),1) AS pct_cump
+          FROM costos_agg a ${whereSql}
+            AND a.pym IS NOT NULL AND a.pym <> ''
+            ${this.aggAsistencial()}
+            ${this.aggExcluirCanceladas()}
+          GROUP BY a.pym
           HAVING poblacion > 200 AND pct_cump < 80
-          ORDER BY pct_cump ASC LIMIT 8
+          -- Desempate por cohorte: sin el, un empate en pct_cump hacia que el
+          -- LIMIT 8 devolviera cohortes distintas entre recargas.
+          ORDER BY pct_cump ASC, cohorte LIMIT 8
         `,
       ),
     ]);

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { DashboardFiltersDto } from '../dashboards/dto/dashboard-filters.dto';
-import { buildCostosWhere } from '../dashboards/dashboard-filters.helper';
+import { buildAggWhere } from '../dashboards/dashboard-filters.helper';
 
 /**
  * Fragmento SQL: limita a citas cuyo contrato (nombre_convenio) tiene nota
@@ -12,7 +12,7 @@ import { buildCostosWhere } from '../dashboards/dashboard-filters.helper';
  */
 function ntFiltro(soloNt: boolean): Prisma.Sql {
   return soloNt
-    ? Prisma.sql`AND c.nombre_convenio IN (SELECT DISTINCT nombre_convenio FROM nt_map)`
+    ? Prisma.sql`AND a.nombre_convenio IN (SELECT DISTINCT nombre_convenio FROM nt_map)`
     : Prisma.empty;
 }
 
@@ -28,7 +28,7 @@ export class FiltrosService {
       Array<{ nombre_sede: string; n: bigint }>
     >(
       Prisma.sql`
-        SELECT nombre_sede, COUNT(*) AS n FROM costos
+        SELECT nombre_sede, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg
         WHERE nombre_sede IS NOT NULL
         GROUP BY nombre_sede ORDER BY n DESC
       `,
@@ -48,14 +48,21 @@ export class FiltrosService {
       Array<{ nombre_convenio: string; n: bigint; tiene_nt: number }>
     >(
       Prisma.sql`
+        -- El LEFT JOIN va contra nt_map COLAPSADO por convenio, no contra la
+        -- tabla cruda. nt_map tiene una fila por (convenio, cups): unir sin
+        -- colapsar multiplica cada fila de citas por las ~1.000 lineas que el
+        -- convenio tiene en la nota tecnica. Eso hacia dos cosas malas a la vez:
+        -- el conteo salia inflado por ese factor, y la consulta no terminaba
+        -- (media >180 s, era la que ahogaba el pool en produccion).
         SELECT
-          c.nombre_convenio,
-          COUNT(*) AS n,
-          MAX(CASE WHEN m.cups IS NOT NULL THEN 1 ELSE 0 END) AS tiene_nt
-        FROM costos c
-        LEFT JOIN nt_map m ON m.nombre_convenio = c.nombre_convenio
-        WHERE c.nombre_convenio IS NOT NULL
-        GROUP BY c.nombre_convenio ORDER BY n DESC
+          a.nombre_convenio,
+          CAST(COALESCE(SUM(a.citas),0) AS SIGNED) AS n,
+          MAX(CASE WHEN m.conv IS NOT NULL THEN 1 ELSE 0 END) AS tiene_nt
+        FROM costos_agg a
+        LEFT JOIN (SELECT DISTINCT nombre_convenio AS conv FROM nt_map) m
+          ON m.conv = a.nombre_convenio
+        WHERE a.nombre_convenio IS NOT NULL
+        GROUP BY a.nombre_convenio ORDER BY n DESC
       `,
     );
     return rows.map((r) => ({
@@ -74,12 +81,12 @@ export class FiltrosService {
     soloNt = false,
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { grupoEspecialidad: _omit, especialidad: _e, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ grupo_especialidad: string; n: bigint }>
     >(
       Prisma.sql`
-        SELECT grupo_especialidad, COUNT(*) AS n FROM costos c ${whereSql}
+        SELECT grupo_especialidad, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg a ${whereSql}
           AND grupo_especialidad IS NOT NULL AND grupo_especialidad <> ''
           ${ntFiltro(soloNt)}
         GROUP BY grupo_especialidad ORDER BY n DESC
@@ -101,7 +108,7 @@ export class FiltrosService {
     const rows = await this.prisma.$queryRaw<
       Array<{ desde: Date | null; hasta: Date | null; total: bigint }>
     >(
-      Prisma.sql`SELECT MIN(fecha_cita) AS desde, MAX(fecha_cita) AS hasta, COUNT(*) AS total FROM costos`,
+      Prisma.sql`SELECT MIN(fecha_cita) AS desde, MAX(fecha_cita) AS hasta, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS total FROM costos_agg`,
     );
     const r = rows[0];
     return {
@@ -122,12 +129,12 @@ export class FiltrosService {
     soloNt = false,
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { convenio: _omit, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ convenio_grupo: string; n: bigint }>
     >(
       Prisma.sql`
-        SELECT convenio_grupo, COUNT(*) AS n FROM costos c ${whereSql}
+        SELECT convenio_grupo, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg a ${whereSql}
           AND convenio_grupo IS NOT NULL AND convenio_grupo <> ''
           ${ntFiltro(soloNt)}
         GROUP BY convenio_grupo ORDER BY n DESC
@@ -149,12 +156,12 @@ export class FiltrosService {
     soloNt = false,
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { sedeGrupo: _g, sede: _s, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ sede_grupo: string; n: bigint }>
     >(
       Prisma.sql`
-        SELECT sede_grupo, COUNT(*) AS n FROM costos c ${whereSql}
+        SELECT sede_grupo, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg a ${whereSql}
           AND sede_grupo IS NOT NULL AND sede_grupo <> ''
           ${ntFiltro(soloNt)}
         GROUP BY sede_grupo ORDER BY n DESC
@@ -187,12 +194,12 @@ export class FiltrosService {
   > {
     const MIN_CITAS_SEDE = 50;
     const { sedeGrupo: _g, sede: _s, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ sede_grupo: string; nombre_sede: string | null; n: bigint }>
     >(
       Prisma.sql`
-        SELECT sede_grupo, nombre_sede, COUNT(*) AS n FROM costos c ${whereSql}
+        SELECT sede_grupo, nombre_sede, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg a ${whereSql}
           AND sede_grupo IS NOT NULL AND sede_grupo <> ''
           ${ntFiltro(soloNt)}
         GROUP BY sede_grupo, nombre_sede
@@ -267,17 +274,17 @@ export class FiltrosService {
   > {
     const MIN_CITAS_CONV = 50;
     const { convenio: _g, convenioDetalle: _d, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ convenio_grupo: string; convenio: string; n: bigint }>
     >(
       Prisma.sql`
         SELECT convenio_grupo,
-               (CASE WHEN c.nombre_convenio LIKE 'NUEVA EPS%' THEN 'NUEVA EPS' ELSE c.nombre_convenio END) AS convenio,
-               COUNT(*) AS n
-        FROM costos c ${whereSql}
+               (CASE WHEN a.nombre_convenio LIKE 'NUEVA EPS%' THEN 'NUEVA EPS' ELSE a.nombre_convenio END) AS convenio,
+               CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n
+        FROM costos_agg a ${whereSql}
           AND convenio_grupo IS NOT NULL AND convenio_grupo <> ''
-          AND c.nombre_convenio IS NOT NULL AND c.nombre_convenio <> ''
+          AND a.nombre_convenio IS NOT NULL AND a.nombre_convenio <> ''
           ${ntFiltro(soloNt)}
         GROUP BY convenio_grupo, convenio
         ORDER BY convenio_grupo, n DESC
@@ -323,12 +330,12 @@ export class FiltrosService {
     soloNt = false,
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { modalidad: _omit, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ modalidad: string; n: bigint }>
     >(
       Prisma.sql`
-        SELECT modalidad, COUNT(*) AS n FROM costos c ${whereSql}
+        SELECT modalidad, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg a ${whereSql}
           AND modalidad IS NOT NULL AND modalidad <> ''
           ${ntFiltro(soloNt)}
         GROUP BY modalidad ORDER BY n DESC
@@ -348,12 +355,12 @@ export class FiltrosService {
     soloNt = false,
   ): Promise<Array<{ value: string; label: string; citas: number }>> {
     const { regimen: _omit, ...rest } = filters;
-    const { whereSql } = buildCostosWhere(rest);
+    const { whereSql } = buildAggWhere(rest);
     const rows = await this.prisma.$queryRaw<
       Array<{ regimen_grupo: string; n: bigint }>
     >(
       Prisma.sql`
-        SELECT regimen_grupo, COUNT(*) AS n FROM costos c ${whereSql}
+        SELECT regimen_grupo, CAST(COALESCE(SUM(citas),0) AS SIGNED) AS n FROM costos_agg a ${whereSql}
           AND regimen_grupo IS NOT NULL AND regimen_grupo <> ''
           ${ntFiltro(soloNt)}
         GROUP BY regimen_grupo ORDER BY n DESC
