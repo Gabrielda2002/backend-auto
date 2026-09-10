@@ -1,8 +1,8 @@
 # Dashboard NT — Nordvital IPS
 
 Consolidación y análisis de costos de citas médicas vs. Nota Técnica para
-**Nordvital IPS**. Monorepo con un backend **NestJS** (API sobre MariaDB) y un
-frontend **Vite + React** con 5 dashboards interactivos.
+**Nordvital IPS**. Backend **NestJS** que expone una API REST sobre MariaDB con
+los datos de los 5 dashboards.
 
 ## Arquitectura
 
@@ -15,18 +15,16 @@ frontend **Vite + React** con 5 dashboards interactivos.
 └───────────────┬─────────────────────────────────────────────┘
                 │ Prisma 7 + @prisma/adapter-mariadb
                 ▼
-        ┌───────────────────────┐        ┌──────────────────────┐
-        │  Backend NestJS (src/) │  /api  │  Frontend Vite (web/)│
-        │  · /dashboards/*       │◀──────▶│  · React + Recharts  │
-        │  · /filtros/*          │        │  · TanStack Query    │
-        │  · caché + throttler   │        │  · motion (animación)│
-        └───────────────────────┘        └──────────────────────┘
+        ┌───────────────────────────┐
+        │  Backend NestJS (src/)     │
+        │  · /api/dashboards/*       │
+        │  · /api/filtros/*          │
+        │  · caché + throttler       │
+        └───────────────────────────┘
 ```
 
 - **Backend**: NestJS 11, Prisma 7 con `@prisma/adapter-mariadb`. Prefijo global
   `api`. Puerto `5808` (o `3000` si `PORT` no está definido).
-- **Frontend**: Vite 5 + React 18 + Tailwind 3, TanStack Query/Table, Recharts,
-  Zod y `motion`. Consume la API en `/api`.
 - **ETL**: consolida PLENUS, PANA y SAP en `costos` (ver `scripts/` y la
   documentación en `docs/`).
 
@@ -34,8 +32,8 @@ frontend **Vite + React** con 5 dashboards interactivos.
 
 ```
 PLENUS ─┐
-PANA  ──┼─► CSV maestros ─► raw_* ─► 04_insert_costos.sql ─► costos ─► API NestJS ─► 5 dashboards
-SAP   ─┘    (append-only)   (MySQL)   (5 BLOQUES)            (+ nt_map)  /dashboards    React
+PANA  ──┼─► CSV maestros ─► raw_* ─► 04_insert_costos.sql ─► costos ─► API NestJS ─► consumidores
+SAP   ─┘    (append-only)   (MySQL)   (5 BLOQUES)            (+ nt_map)  /api/dashboards
 ```
 
 El recorrido completo del dato (orígenes → ETL → `costos`/`nt_map` → API →
@@ -86,21 +84,10 @@ pnpm run prisma:generate
 pnpm run start:dev         # API en http://localhost:5808/api
 ```
 
-### 4. Frontend
-
-```powershell
-cd web
-pnpm install
-pnpm approve-builds        # marcar esbuild (SPACE + ENTER)
-pnpm dev                   # UI en http://localhost:5173
-```
-
 > **Nota**: en la raíz, `pnpm run <script>` hace un chequeo previo de
-> dependencias que falla mientras haya *build scripts* sin aprobar. El frontend
-> (`web/`) ya lo desactiva con `verifyDepsBeforeRun: false`. Si en la raíz no
-> puedes aprobar los builds, arranca llamando node directo:
-> - Frontend: `node node_modules/vite/bin/vite.js`
-> - Backend: `node node_modules/@nestjs/cli/bin/nest.js start --watch`
+> dependencias que falla mientras haya *build scripts* sin aprobar. Si no puedes
+> aprobar los builds, arranca llamando node directo:
+> `node node_modules/@nestjs/cli/bin/nest.js start --watch`
 
 ## Comandos útiles
 
@@ -117,15 +104,6 @@ Backend (raíz):
 | Prisma migrate | `pnpm run prisma:migrate` |
 | Seed | `pnpm run prisma:seed` |
 
-Frontend (`web/`):
-
-| Tarea | Comando |
-|------|---------|
-| Dev | `pnpm dev` |
-| Build | `pnpm build` |
-| Typecheck | `npx tsc --noEmit` |
-| Lint | `pnpm lint` |
-
 ## Estructura
 
 ```
@@ -136,11 +114,6 @@ src/                      Backend NestJS
   prisma/                 PrismaModule global + PrismaService (adapter MariaDB)
 prisma/
   schema.prisma           modelos (Cat*, Raw*, Costos, NotaTecnica, NtMap, CatConvenioAgrupador)
-web/                      Frontend Vite + React (proyecto pnpm independiente)
-  src/pages/              una página por dashboard
-  src/components/{ui,charts,motion,filters,layout}/
-  src/lib/api/            cliente API tipado por dominio (client, filtros, dashboards)
-  src/lib/                queries (TanStack), use-filters (URL), utils
 scripts/                  utilidades Python (ver scripts/README.md)
 docs/                     documentación del proyecto y dashboards estáticos (legacy)
 ```
@@ -148,14 +121,13 @@ docs/                     documentación del proyecto y dashboards estáticos (l
 ## Dashboards
 
 1. **Resumen Gerencial** — KPIs globales, evolución mensual, cumplimiento por convenio.
-2. **Ejecución vs Nota Técnica** — cumplimiento vs meta NT, heatmap convenio×CUPS, catálogo NT (con buscador por CUPS/descripción) y las secciones *Contratado sin Ejecutar* y *Ejecutado fuera de NT*.
+2. **Ejecución vs Nota Técnica** — cumplimiento vs meta NT, heatmap convenio×CUPS, catálogo NT y las secciones *Contratado sin Ejecutar* y *Ejecutado fuera de NT*.
 3. **Análisis Financiero** — costo real vs esperado, recuperación, Pareto de CUPS.
 4. **Calidad y Oportunidad** — oportunidad por especialidad, estados por sede, inasistencia.
 5. **PyM / RIAS** — programas de promoción y mantenimiento.
 
-Los filtros (Periodo, Sede, Convenio, Modalidad, Régimen) son globales,
-single-select y se sincronizan con la URL. Las secciones con muchos datos se
-recorren con un carrusel paginado (no se limitan a un top-N).
+Todos los endpoints aceptan los filtros globales (Periodo, Sede, Convenio,
+Modalidad, Régimen) como query params y devuelven listas completas (no top-N).
 
 > **Cálculos y límites**: el cumplimiento se mide solo sobre convenios con nota
 > técnica. La meta del período es `meta_mes × meses con ejecución` por
