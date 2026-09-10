@@ -58,7 +58,7 @@
         <mxCell id="tbl_cat" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;cat_*&lt;/b&gt;  (catálogos)&lt;br&gt;cat_cups · cat_convenio_agrupador · …" vertex="1">
           <mxGeometry height="55" width="220" x="85" y="522" as="geometry" />
         </mxCell>
-        <mxCell id="filtros_bar" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#f0a30a;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;buildCostosWhere(filtros)&lt;/b&gt;&lt;br&gt;periodo · sede · convenio ·&lt;br&gt;modalidad · régimen · grupo especialidad" vertex="1">
+        <mxCell id="filtros_bar" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#f0a30a;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;buildAggWhere(filtros)&lt;/b&gt;&lt;br&gt;periodo · sede · convenio ·&lt;br&gt;modalidad · régimen · grupo especialidad" vertex="1">
           <mxGeometry height="70" width="340" x="540" y="100" as="geometry" />
         </mxCell>
         <mxCell id="helpers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#f0a30a;fontSize=10;align=left;spacingLeft=6;verticalAlign=top;spacingTop=4;" value="&lt;b&gt;Helpers SQL crudo&lt;/b&gt;&lt;br&gt;convNt() · soloConsulta() · excluirAgendas()&lt;br&gt;ejecAgg() · diasHabiles(festivos)&lt;br&gt;periodoMeses() · contratadoScope()&lt;br&gt;serializeRow() (BigInt/Decimal → number)" vertex="1">

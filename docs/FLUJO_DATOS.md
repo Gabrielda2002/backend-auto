@@ -112,19 +112,24 @@ La normalización **no vive en las queries**, vive en tablas `cat_*` (auditable)
 ## 5. API NestJS (capa 6)
 
 Toda la lógica de negocio vive en `src/dashboards/dashboards.service.ts` como
-SQL crudo parametrizado. El helper `buildCostosWhere` (en
+SQL crudo parametrizado. El helper `buildAggWhere` (en
 `dashboard-filters.helper.ts`) arma el `WHERE` a partir de los filtros.
 
-### 5.1 Filtros (`buildCostosWhere`)
+### 5.1 Filtros (`buildAggWhere`)
 
-| Filtro | Columna en `costos` |
-|--------|---------------------|
+Las condiciones se emiten con prefijo `a.`, así que la consulta que las reciba
+debe leer de **`costos_agg` con alias `a`** (el pre-agregado, no `costos` cruda).
+
+| Filtro | Columna en `costos_agg` |
+|--------|-------------------------|
 | `desde` / `hasta` | `fecha_cita` |
 | `sedeGrupo` | `sede_grupo` (ciudad) |
 | `sede` | `nombre_sede` (sede física) |
 | `convenio` | `convenio_grupo` |
+| `convenioDetalle` | `convenio_nt` (NUEVA EPS unificado) |
 | `modalidad` | `modalidad` |
 | `regimen` | `regimen_grupo` |
+| `especialidad` | `especialidad` |
 | `grupoEspecialidad` | `grupo_especialidad` |
 
 ### 5.2 Cálculos por endpoint

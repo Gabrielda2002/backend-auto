@@ -98,7 +98,7 @@ helpers and rules (all reconcile: catalog meta == KPI meta):
 
 - `src/prisma/` — Global PrismaModule + PrismaService.
 - `src/common/` — Cross-cutting: filters, logger config, middleware.
-- `src/dashboards/` — the 5 dashboard endpoints **and** all NT-cumplimiento logic (see "Ejecución NT — cumplimiento rules" above). Includes `dashboard-filters.helper.ts` (`buildCostosWhere`).
+- `src/dashboards/` — the 5 dashboard endpoints **and** all NT-cumplimiento logic (see "Ejecución NT — cumplimiento rules" above). Includes `dashboard-filters.helper.ts` (`buildAggWhere` — emits `a.`-prefixed conditions, so the receiving query must read `FROM costos_agg a`).
 - `src/filtros/` — catalog endpoints that feed the UI selects (sedes, convenios, modalidades, regímenes…).
 - The 14 per-table CRUD modules (`cat-*`, `raw-*`) were removed as dead code; only the modules above are registered in `app.module.ts`.
 - `test/` — E2E tests with separate Jest config (`test/jest-e2e.json`).

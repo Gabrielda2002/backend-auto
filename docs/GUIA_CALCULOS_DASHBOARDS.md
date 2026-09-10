@@ -50,7 +50,7 @@ renombrados o eliminados). Ver [§8](#8-sincronización-backend↔frontend).
 | Archivo | Rol | Cuándo tocarlo |
 |---|---|---|
 | [`../src/dashboards/dashboards.service.ts`](../src/dashboards/dashboards.service.ts) | **Núcleo.** Las 5 funciones `getX` + 3 helpers | Casi siempre: fórmulas, KPIs, métricas |
-| [`../src/dashboards/dashboard-filters.helper.ts`](../src/dashboards/dashboard-filters.helper.ts) | `buildCostosWhere()` — construye el `WHERE` de filtros | Al cambiar cómo aplica un filtro |
+| [`../src/dashboards/dashboard-filters.helper.ts`](../src/dashboards/dashboard-filters.helper.ts) | `buildAggWhere()` — construye el `WHERE` de filtros sobre `costos_agg` | Al cambiar cómo aplica un filtro |
 | [`../src/filtros/filtros.service.ts`](../src/filtros/filtros.service.ts) | Los 10 endpoints de los `<select>` de la barra de filtros | Solo si cambian las opciones de filtro |
 | [`../prisma/schema.prisma`](../prisma/schema.prisma) | Tablas `Costos`, `NtMap`, `NotaTecnica` | Solo si agregas/renombras columnas |
 
@@ -78,26 +78,28 @@ Los 5 métodos siguen el mismo patrón. Ejemplo simplificado:
 
 ```ts
 async getResumen(filters: DashboardFiltersDto) {
-  const { whereSql } = buildCostosWhere(filters);   // 1. WHERE de filtros
+  const { whereSql } = buildAggWhere(filters);      // 1. WHERE de filtros
 
-  const [a, b, c] = await Promise.all([             // 2. queries en paralelo
-    this.prisma.$queryRaw`... FROM costos c ${whereSql} ...`,
-    this.prisma.$queryRaw`... FROM costos c ${whereSql} ${ntConvenios} ...`,
+  const [x, y, z] = await Promise.all([             // 2. queries en paralelo
+    this.prisma.$queryRaw`... FROM costos_agg a ${whereSql} ...`,
+    this.prisma.$queryRaw`... FROM costos_agg a ${whereSql} ${this.aggSoloNt()} ...`,
     // ...
   ]);
 
   return {                                          // 3. shape de respuesta
-    meta: serializeRow(a[0]),
+    meta: serializeRow(x[0]),
     kpis: { ... },
   };
 }
 ```
 
 Puntos clave del patrón:
-- **`buildCostosWhere(filters)`** devuelve `whereSql`, que **siempre** incluye la
+- **`buildAggWhere(filters)`** devuelve `whereSql`, que **siempre** incluye la
   palabra `WHERE` (con `1=1` si no hay filtros). Por eso puedes concatenar más
   condiciones con `AND` sin condicionales.
-- **Alias obligatorio `c`** para la tabla `costos` (los helpers lo asumen).
+- **Alias obligatorio `a`** para la tabla `costos_agg` (el helper lo asume: emite
+  las condiciones con prefijo `a.` y nadie valida que el `FROM` coincida). Los
+  dashboards leen del **pre-agregado**, no de `costos` cruda.
 - Las queries corren en **`Promise.all`** (paralelas, independientes).
 - **`serializeRow()`** convierte `BigInt`/`Decimal` → `number` antes de
   responder (NestJS no serializa `BigInt` nativo). Toda fila devuelta pasa por
@@ -309,12 +311,25 @@ Endpoint `GET /api/dashboards/pym` · schema `PymSchema`.
   la rama `isActive(filters.X)`. Afecta a **los 5** paneles y a `filtros.service.ts`.
 - **Un filtro nuevo**: añade la prop al DTO
   [`dashboard-filters.dto.ts`](../src/dashboards/dto/dashboard-filters.dto.ts),
-  la rama en `buildCostosWhere`, la key en el front
-  (`.../app/lib/use-filters.ts`) y, si aplica, un endpoint de opciones en
-  `filtros.service.ts`.
+  la rama en `buildAggWhere`, la columna en `costos_agg` (`construirAgregado()`,
+  si no existe ya), la key en el front (`.../app/lib/use-filters.ts` →
+  `URL_KEYS`), la dimensión en `.../app/lib/queries.ts` → `FACET_DIMS` y, si
+  aplica, un endpoint de opciones en `filtros.service.ts`.
+
+> Si la dimensión no entra en `FACET_DIMS`, viaja igual en el request pero queda
+> fuera de la key de cache: TanStack sirve la lista vieja durante 5 min y el
+> `<select>` no refleja el filtro. Es un fallo silencioso — no hay error.
 - **Un cálculo que debe ignorar un filtro** (como la meta a nivel ciudad de
-  ejec-NT): llama a `buildCostosWhere({ ...filters, X: undefined })` para ese
+  ejec-NT): llama a `buildAggWhere({ ...filters, X: undefined })` para ese
   bloque, como hace `whereMetaSql` con `sede`.
+
+> ⚠️ **Siempre `buildAggWhere`.** Emite las condiciones con prefijo `a.` y el
+> `FROM` que las reciba tiene que ser `costos_agg a`. El fragmento se inyecta
+> sin validación: si el alias no coincide, MySQL responde 1054 `Unknown column`
+> **en runtime** y TypeScript no lo detecta. Existió un `buildCostosWhere` que
+> emitía alias `c` para la tabla cruda `costos`; esta guía llegó a recomendarlo
+> aquí después de la migración a `costos_agg`, y eso rompió el KPI de ejec-NT al
+> filtrar por sede física. Ya no existe: hay un único builder.
 
 ---
 
