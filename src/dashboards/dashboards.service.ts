@@ -7,7 +7,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { DashboardFiltersDto } from './dto/dashboard-filters.dto';
-import { buildAggWhere, buildCostosWhere } from './dashboard-filters.helper';
+import { buildAggWhere } from './dashboard-filters.helper';
 
 @Injectable()
 export class DashboardsService {
@@ -238,7 +238,7 @@ export class DashboardsService {
    * optimizador ni usa el indice.
    *
    * COMO LO RESUELVE: colapsa `costos` por las dimensiones de
-   * `buildCostosWhere` y resuelve UNA SOLA VEZ, aqui, los dos predicados
+   * `buildAggWhere` y resuelve UNA SOLA VEZ, aqui, los dos predicados
    * caros que hoy se evaluan por fila en cada consulta:
    *   - `agenda_no_asistencial` (el UPPER/TRIM sobre nombre_medico)
    *   - `tiene_nt` (el IN contra nt_map)
@@ -612,7 +612,16 @@ export class DashboardsService {
     // Meta a nivel ciudad: misma base pero ignorando la sede fisica. Asi, al
     // seleccionar una sede, el KPI muestra su aporte respecto a la ciudad
     // (ejecutado_sede / meta_ciudad). Sin sede seleccionada whereMetaSql == whereSql.
-    const { whereSql: whereMetaSql } = buildCostosWhere({
+    //
+    // Este fragmento se inyecta en periodoMeses(), ejecAgg() y
+    // contratadoScope(), que leen de `costos_agg` con alias `a`, asi que tiene
+    // que salir de buildAggWhere. Antes lo armaba un segundo builder que emitia
+    // alias `c` (para la tabla cruda `costos`) y MySQL respondia 1054 "Unknown
+    // column 'c.sede_grupo'". Como whereMetaSql solo se usa en la rama
+    // `sedeActiva`, el fallo aparecia unicamente al bajar al detalle de sede
+    // fisica, y tumbaba el endpoint entero porque las 7 consultas van en
+    // Promise.all. Ese builder ya no existe.
+    const { whereSql: whereMetaSql } = buildAggWhere({
       ...filters,
       sede: undefined,
     });
@@ -647,7 +656,11 @@ export class DashboardsService {
     const kpiSql = sedeActiva
       ? Prisma.sql`
           SELECT
-            num.ejecutado AS ejecutado,
+            -- ROUND igual que en la rama sin sede: el reparto proporcional del
+            -- numerador capado da decimales (129973.3826) y esto es un conteo
+            -- de citas. El pct se calcula ANTES de redondear, sobre el valor
+            -- exacto, para no arrastrar el error al porcentaje.
+            ROUND(num.ejecutado) AS ejecutado,
             den.meta_periodo AS meta_periodo,
             ROUND(100 * num.ejecutado / NULLIF(den.meta_periodo, 0), 1) AS pct
           FROM
